@@ -335,7 +335,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--pink);outline-of
     <div class="setfld">
       <label>② あいことば（token）</label>
       <input type="text" id="set-token" placeholder="merone-diet-2026">
-      <div class="hint">GAS側と同じ文字にします。初期値のままでOK。</div>
+      <div class="hint">好きな文字でOK。「①GASコードをコピー」が自動でこの文字を埋め込むので、合わせる作業は不要です。</div>
     </div>
 
     <div class="setgrid">
@@ -969,13 +969,15 @@ function mailtoBug(txt){
 }
 function copyCode(){
   var ta=document.getElementById('gascode');
+  var tok=((document.getElementById('set-token').value||'').trim()).replace(/['\\\r\n]/g,'')||'merone-diet-2026';
+  var code=ta.value.replace("var TOKEN = 'merone-diet-2026';","var TOKEN = '"+tok+"';");
   var box=document.getElementById('chkResult');
-  var done=function(){ box.className='chk ok'; box.textContent='コードをコピーしました。Apps Scriptに貼り付けてください ♪'; };
-  var fail=function(){ ta.style.position='static';ta.style.left='0';ta.style.top='0';ta.style.height='120px';ta.style.width='100%'; ta.removeAttribute('aria-hidden'); ta.focus(); ta.select(); box.className='chk ok'; box.textContent='下の枠のコードを長押し→全選択してコピーしてください。'; };
+  var ok=function(){ box.className='chk ok'; box.textContent='コードをコピーしました（あいことば「'+tok+'」入り）。Apps Scriptに全部貼り付けてね ♪'; };
+  var manual=function(){ ta.value=code; ta.style.position='static';ta.style.left='0';ta.style.top='0';ta.style.height='140px';ta.style.width='100%'; ta.removeAttribute('aria-hidden'); ta.focus(); ta.select(); box.className='chk ok'; box.textContent='下の枠のコードを全選択してコピーしてね。'; };
   try{
-    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done,fail); }
-    else{ ta.style.position='static';ta.style.left='0';ta.select(); document.execCommand('copy'); done(); }
-  }catch(e){ fail(); }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(ok,manual); }
+    else{ ta.value=code; ta.style.position='static';ta.style.left='0';ta.select(); document.execCommand('copy'); ok(); }
+  }catch(e){ manual(); }
 }
 
 /* =================== safe boot (runs last, after all definitions) =================== */
