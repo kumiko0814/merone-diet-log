@@ -637,6 +637,7 @@ var BODY_ROWS=[
 /* =================== init =================== */
 function init(){
   loadSettings();
+  applySetupParams();
   buildBody();
   // date
   var d=document.getElementById('date');
@@ -812,7 +813,23 @@ function loadSettings(){
   try{
     var s=JSON.parse(localStorage.getItem(LS_SET)||'null');
     if(s){ settings=Object.assign(settings,s); settings.ideal=Object.assign({},DEFAULT_IDEAL,s.ideal||{}); }
-  }catch(e){ window.__log('loadSettings: '+e.message,true); }
+  }catch(e){ if(window.__log)window.__log('loadSettings: '+e.message,true); }
+}
+/* one-tap setup link: ?url=...&token=...&h=...&name=... -> save then clean the address bar */
+function applySetupParams(){
+  try{
+    if(!location.search) return;
+    var p=new URLSearchParams(location.search), changed=false;
+    if(p.get('url')){ settings.url=p.get('url').trim(); changed=true; }
+    if(p.get('token')){ settings.token=p.get('token').trim(); changed=true; }
+    if(p.get('h')){ settings.height=parseFloat(p.get('h'))||settings.height; changed=true; }
+    if(p.get('name')!==null && p.get('name')!==''){ settings.name=p.get('name'); changed=true; }
+    if(changed){
+      localStorage.setItem(LS_SET,JSON.stringify(settings));
+      if(history&&history.replaceState){ history.replaceState(null,'',location.pathname); }
+      setTimeout(function(){ toast('保存先をセットしました ♡ もう使えます','ok'); },400);
+    }
+  }catch(e){ if(window.__log)window.__log('setupParams: '+e.message,true); }
 }
 function openSettings(){
   document.getElementById('set-url').value=settings.url||'';
