@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6c3d0">
+<title>Daily Diet Log｜1日きろく</title>
+<style>
+/* ============ base ============ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+:root{
+  --cream:#fff8f5;
+  --cream2:#fdeef2;
+  --blue:#eef3fb;
+  --pink:#e79ab1;
+  --pink-d:#d5738f;
+  --pink-soft:#fbe4ec;
+  --navy:#3a4467;
+  --navy-soft:#7683a6;
+  --mint:#7fcdb8;
+  --gold:#e6b566;
+  --line:#f0dfe6;
+  --card:#ffffff;
+  --shadow:0 12px 34px rgba(206,140,166,.16);
+  --shadow-s:0 4px 14px rgba(206,140,166,.12);
+  --radius:22px;
+  --radius-s:14px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Segoe UI",system-ui,sans-serif;
+}
+body{
+  font-family:var(--font);
+  color:var(--navy);
+  line-height:1.6;
+  background:
+    radial-gradient(120% 90% at 0% 0%, #fdeef2 0%, rgba(253,238,242,0) 55%),
+    radial-gradient(120% 90% at 100% 0%, #eef3fb 0%, rgba(238,243,251,0) 55%),
+    linear-gradient(180deg,#fff8f5 0%,#fdf2f5 100%);
+  min-height:100vh;
+  min-height:100dvh;
+  padding:0 0 130px;
+  padding-bottom:calc(130px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+  text-size-adjust:100%;-webkit-text-size-adjust:100%;
+}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:.01em}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--navy)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pink);outline-offset:1px}
+
+/* ============ header ============ */
+.hero{
+  position:relative;overflow:hidden;
+  margin:0 0 18px;padding:28px 22px 26px;
+  border-radius:0 0 32px 32px;
+  background:linear-gradient(135deg,#f7c6d4 0%,#f3b3cb 42%,#d9b8e8 100%);
+  box-shadow:0 14px 30px rgba(224,150,180,.28);
+  color:#fff;
+}
+.hero::after{content:"";position:absolute;right:-40px;top:-46px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.16)}
+.hero::before{content:"";position:absolute;left:-30px;bottom:-50px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero .inner{position:relative;z-index:1;max-width:520px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;letter-spacing:.14em;opacity:.95}
+.brand .leaf{width:20px;height:20px;display:inline-block}
+.hero h1{font-size:23px;margin:8px 0 2px;text-shadow:0 2px 8px rgba(180,90,120,.25)}
+.hero .greet{font-size:13.5px;opacity:.96;font-weight:600}
+.datebar{margin-top:16px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.9);border-radius:16px;padding:10px 12px;box-shadow:0 6px 16px rgba(190,110,140,.18)}
+.datebar .cal{width:22px;height:22px;color:var(--pink-d);flex:0 0 auto}
+.datebar input{border:none;background:transparent;font-weight:800;font-size:16px;color:var(--navy);width:100%;padding:2px 0}
+.datebar .dow{flex:0 0 auto;font-weight:800;color:var(--pink-d);font-size:15px}
+.daycount{margin-top:9px;font-size:12px;opacity:.95;font-weight:600}
+
+/* ============ card ============ */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin:0 0 16px;padding:18px 17px;
+  border:1px solid rgba(255,255,255,.7);
+}
+.card > .ttl{display:flex;align-items:center;gap:9px;margin:0 0 14px}
+.card > .ttl .ic{width:26px;height:26px;flex:0 0 auto;color:var(--pink-d)}
+.card > .ttl h2{font-size:16.5px}
+.card > .ttl .sub{margin-left:auto;font-size:11.5px;color:var(--navy-soft);font-weight:700}
+
+/* ============ balance rings ============ */
+.rings{display:flex;gap:8px;justify-content:space-between}
+.ring{flex:1;text-align:center}
+.ring svg{width:82px;height:82px;display:block;margin:0 auto}
+.ring .track{fill:none;stroke:#f2e6ec;stroke-width:9}
+.ring .bar{fill:none;stroke-width:9;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dasharray .5s ease}
+.ring .cval{font-size:14px;font-weight:800;fill:var(--navy)}
+.ring .lab{font-size:12px;font-weight:800;margin-top:4px;color:var(--navy)}
+.ring .goal{font-size:11px;color:var(--navy-soft);font-weight:700}
+.minibars{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px}
+.mb{font-size:12px}
+.mb .mrow{display:flex;justify-content:space-between;font-weight:700;margin-bottom:3px}
+.mb .mrow .v{color:var(--pink-d)}
+.mb .bar{height:7px;border-radius:6px;background:#f2e6ec;overflow:hidden}
+.mb .bar>i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#f5b9cd,#e79ab1);transition:width .5s ease}
+.mb.blue .bar>i{background:linear-gradient(90deg,#aecdf0,#8fb8ea)}
+.mb.mint .bar>i{background:linear-gradient(90deg,#9fe0cf,#7fcdb8)}
+.mb.gold .bar>i{background:linear-gradient(90deg,#f2d29a,#e6b566)}
+.cheer{margin-top:14px;font-size:12.5px;font-weight:700;color:var(--pink-d);background:var(--pink-soft);border-radius:12px;padding:9px 12px;text-align:center}
+
+/* ============ meal list ============ */
+.meal{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:11px 11px 12px;margin-bottom:11px;position:relative;box-shadow:var(--shadow-s)}
+.meal .del{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:#fbe4ec;color:var(--pink-d);font-size:16px;font-weight:800;line-height:24px;text-align:center}
+.meal .r1{display:flex;gap:8px;align-items:center;margin-bottom:8px;padding-right:30px}
+.meal .r1 .tm{width:104px;flex:0 0 auto}
+.meal .r1 .food{flex:1}
+.meal .r2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:10.5px;font-weight:800;color:var(--navy-soft);padding-left:2px}
+.fld input,.fld select{border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;background:#fffdfe;width:100%;font-weight:600}
+.fld input[type=number]{-moz-appearance:textfield}
+.unit{position:relative}
+.unit .u{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--navy-soft);font-weight:700;pointer-events:none}
+.addbtn{width:100%;padding:13px;border-radius:15px;border:2px dashed var(--pink);color:var(--pink-d);font-weight:800;font-size:14.5px;background:#fff6fa;display:flex;align-items:center;justify-content:center;gap:7px}
+.addbtn:active{transform:scale(.99)}
+
+/* ============ grids ============ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.seg{display:flex;background:#f6eaf0;border-radius:13px;padding:3px;gap:3px}
+.seg button{flex:1;padding:9px 6px;border-radius:10px;font-weight:800;font-size:13px;color:var(--navy-soft)}
+.seg button.on{background:#fff;color:var(--pink-d);box-shadow:var(--shadow-s)}
+.seg.mint button.on{color:#2f9c82}
+
+/* ============ body comp ============ */
+.body-tbl{display:flex;flex-direction:column;gap:9px}
+.brow{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;align-items:end}
+.brow .bl{font-size:12.5px;font-weight:800;color:var(--navy);padding-bottom:10px}
+.brow .hd{font-size:10.5px;font-weight:800;color:var(--navy-soft);text-align:center;padding-bottom:2px}
+.headrow{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;margin-bottom:-2px}
+
+/* ============ save bar ============ */
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,248,245,0),#fff8f5 34%);}
+.savebar .in{max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.saveBtn{flex:1;padding:16px;border-radius:18px;font-size:16.5px;font-weight:900;color:#fff;background:linear-gradient(135deg,#f19bb6,#e2789a);box-shadow:0 10px 24px rgba(226,120,154,.4);display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .12s}
+.saveBtn:active{transform:scale(.98)}
+.saveBtn[disabled]{opacity:.55}
+.gear{width:54px;height:54px;flex:0 0 auto;border-radius:16px;background:#fff;box-shadow:var(--shadow-s);color:var(--pink-d);display:flex;align-items:center;justify-content:center}
+.gear svg{width:24px;height:24px}
+.savestat{position:fixed;left:0;right:0;bottom:calc(84px + env(safe-area-inset-bottom));text-align:center;z-index:49;pointer-events:none}
+.savestat span{display:inline-block;background:#3a4467;color:#fff;font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:20px;box-shadow:0 6px 16px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:.3s}
+.savestat.show span{opacity:1;transform:none}
+.savestat.ok span{background:#4bb596}
+.savestat.err span{background:#e07a7a}
+
+/* ============ modal ============ */
+.mask{position:fixed;inset:0;top:0;left:0;right:0;bottom:0;background:rgba(58,68,103,.4);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.mask.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:22px 18px calc(26px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+.sheet h2{font-size:18px;margin-bottom:4px}
+.sheet .lead{font-size:12.5px;color:var(--navy-soft);margin-bottom:16px;font-weight:600}
+.sheet .grip{width:44px;height:5px;border-radius:3px;background:#e7d5dd;margin:0 auto 14px}
+.setfld{margin-bottom:14px}
+.setfld > label{display:block;font-size:12.5px;font-weight:800;margin-bottom:5px}
+.setfld input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;background:#fffdfe;font-weight:600}
+.setfld .hint{font-size:11px;color:var(--navy-soft);margin-top:4px;font-weight:600}
+.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-row{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;padding:13px;border-radius:14px;font-weight:800;font-size:14px;text-align:center}
+.btn.p{background:linear-gradient(135deg,#f19bb6,#e2789a);color:#fff}
+.btn.g{background:#f2e9ee;color:var(--navy)}
+.btn.o{background:#eef3fb;color:#4a6aa0}
+.chk{font-size:12.5px;font-weight:700;padding:10px 12px;border-radius:12px;margin-top:10px;display:none}
+.chk.ok{display:block;background:#e5f6f0;color:#2f9c82}
+.chk.err{display:block;background:#fdeaea;color:#d16565}
+
+/* ============ float buttons ============ */
+.fabs{position:fixed;right:14px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:48;display:flex;flex-direction:column;gap:9px}
+.fab{width:46px;height:46px;border-radius:50%;background:#fff;box-shadow:var(--shadow);color:var(--navy-soft);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.fab svg{width:20px;height:20px}
+
+/* ============ debug ============ */
+#dbg{display:none;position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;background:#0d1220;color:#8fe;font:11px/1.5 monospace;padding:8px 10px 40px;z-index:2000;white-space:pre-wrap}
+#dbg b{color:#f9a}
+#escape{display:none;position:fixed;top:8px;right:8px;z-index:2147483647;background:#e2789a;color:#fff;font-weight:800;font-size:12px;padding:8px 12px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#boot{position:fixed;inset:0;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#fdeef2,#eef3fb);display:flex;align-items:center;justify-content:center;z-index:1500;flex-direction:column;gap:14px}
+#boot .sp{width:40px;height:40px;border-radius:50%;border:4px solid #f3c9d7;border-top-color:#e2789a;animation:spin .8s linear infinite}
+#boot p{font-size:13px;font-weight:800;color:var(--pink-d)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pop{animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.hearts{position:fixed;inset:0;pointer-events:none;z-index:200;display:none}
+</style>
+</head>
+<body>
+<button id="escape" onclick="document.getElementById('boot').style.display='none';this.style.display='none'">画面を表示</button>
+<div id="boot"><div class="sp"></div><p>よみこみ中…</p></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M12 21c-5-2-8-6-8-11 0-2 1-4 3-5 1 3 4 4 6 5s3 4 2 7c3-1 5-4 5-8 2 4 1 9-3 11-2 1-5 1-7 1z" fill="#fff" opacity=".95"/></svg>
+      <span>DAILY DIET LOG</span>
+    </div>
+    <h1>今日の、わたしのきろく</h1>
+    <div class="greet" id="greet">少しずつで大丈夫。今日もていねいに。</div>
+    <div class="datebar">
+      <svg class="cal" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="date" id="date">
+      <span class="dow" id="dow">（月）</span>
+    </div>
+    <div class="daycount" id="daycount">&nbsp;</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===== BALANCE ===== -->
+  <section class="card">
+    <div class="ttl">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-9.3-9.2C1.2 8.6 3 5 6.5 5 8.7 5 10 6.3 12 8.5 14 6.3 15.3 5 17.5 5 21 5 22.8 8.6 21.3 11.8 19 16.5 12 21 12 21z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <h2>今日のバランス</h2>
+      <span class="sub" id="mealcount">食事 0回</span>
+    </div>
+    <div class="rings">
+      <div class="ring">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="bar" id="ring-kcal" cx="45" cy="45" r="38" stroke="#e79ab1" stroke-dasharray="0 240"/><text class="cval" x="45" y="50" text-anchor="middle" id="t-kcal">0</text></svg>
+        <div class="lab">カロリー</div><div class="goal"><span id="g-kcal">/470</span> kcal</div>
+      </div>
+      <div class="ring">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="bar" id="ring-pro" cx="45" cy="45" r="38" stroke="#8fb8ea" stroke-dasharray="0 240"/><text class="cval" x="45" y="50" text-anchor="middle" id="t-pro">0</text></svg>
+        <div class="lab">プロテイン</div><div class="goal"><span id="g-pro">/80</span> g</div>
+      </div>
+      <div class="ring">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="bar" id="ring-water" cx="45" cy="45" r="38" stroke="#7fcdb8" stroke-dasharray="0 240"/><text class="cval" x="45" y="50" text-anchor="middle" id="t-water">0</text></svg>
+        <div class="lab">水分</div><div class="goal"><span id="g-water">/3000</span> ml</div>
+      </div>
+    </div>
+    <div class="minibars">
+      <div class="mb gold"><div class="mrow"><span>睡眠</span><span class="v"><b id="v-sleep">0</b>/<span id="gg-sleep">7</span>h</span></div><div class="bar"><i id="b-sleep" style="width:0"></i></div></div>
+      <div class="mb"><div class="mrow"><span>入浴</span><span class="v"><b id="v-bath">0</b>/<span id="gg-bath">60</span>分</span></div><div class="bar"><i id="b-bath" style="width:0"></i></div></div>
+      <div class="mb mint"><div class="mrow"><span>有酸素</span><span class="v"><b id="v-aero">0</b>/<span id="gg-aero">60</span>分</span></div><div class="bar"><i id="b-aero" style="width:0"></i></div></div>
+      <div class="mb blue"><div class="mrow"><span>マッサージ</span><span class="v"><b id="v-mas">0</b>/<span id="gg-mas">60</span>分</span></div><div class="bar"><i id="b-mas" style="width:0"></i></div></div>
+    </div>
+    <div class="cheer" id="cheer">きろくをはじめましょう ♪</div>
+  </section>
+
+  <!-- ===== MEALS ===== -->
+  <section class="card">
+    <div class="ttl">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M6 3v8a2 2 0 002 2v8M8 3v6M4 3v6M18 3c-1.5 0-2 2-2 5s.5 4 2 4v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>食べたもの</h2>
+      <span class="sub">時刻ごとにきろく</span>
+    </div>
+    <div id="meals"></div>
+    <button class="addbtn" onclick="addMeal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      食事・水分を追加
+    </button>
+  </section>
+
+  <!-- ===== RHYTHM & CARE ===== -->
+  <section class="card">
+    <div class="ttl">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <h2>リズム & ケア</h2>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label>起床</label><input type="time" id="wake" value="07:00"></div>
+      <div class="fld"><label>就寝</label><input type="time" id="sleep-t" value="00:00"></div>
+    </div>
+    <div class="grid2" style="margin-top:11px">
+      <div class="fld"><label>睡眠時間</label><div class="unit"><input type="number" step="0.5" inputmode="decimal" id="sleepH" placeholder="7"><span class="u">時間</span></div></div>
+      <div class="fld"><label>入浴</label><div class="unit"><input type="number" inputmode="numeric" id="bath" placeholder="60"><span class="u">分</span></div></div>
+    </div>
+    <div class="grid2" style="margin-top:11px">
+      <div class="fld"><label>有酸素運動</label><div class="unit"><input type="number" inputmode="numeric" id="aero" placeholder="60"><span class="u">分</span></div></div>
+      <div class="fld"><label>マッサージ</label><div class="unit"><input type="number" inputmode="numeric" id="mas" placeholder="60"><span class="u">分</span></div></div>
+    </div>
+    <div style="margin-top:15px" class="grid2">
+      <div>
+        <label style="font-size:11px;font-weight:800;color:var(--navy-soft);display:block;margin-bottom:6px;padding-left:2px">排便</label>
+        <div class="seg" data-seg="haiben"><button data-v="あり">あり</button><button data-v="なし">なし</button></div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:800;color:var(--navy-soft);display:block;margin-bottom:6px;padding-left:2px">便秘薬</label>
+        <div class="seg" data-seg="benpi"><button data-v="あり">あり</button><button data-v="なし">なし</button></div>
+      </div>
+    </div>
+    <div class="fld" style="margin-top:13px"><label>体調・ひとことメモ</label><input type="text" id="taicho" placeholder="今日の調子は？（例：スッキリ / むくみ気味）"></div>
+  </section>
+
+  <!-- ===== BODY ===== -->
+  <section class="card">
+    <div class="ttl">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="2"/><path d="M8 6V4M16 6V4M9 12h6M12 12v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <h2>朝の計測</h2>
+      <span class="sub">当日 / 目標</span>
+    </div>
+    <div class="headrow"><span></span><span class="hd">当日</span><span class="hd">目標</span></div>
+    <div class="body-tbl" id="bodytbl"></div>
+    <div style="font-size:11px;color:var(--navy-soft);margin-top:10px;font-weight:600">前日の数値・前日比・差分はスプレッドシート側で自動計算されます。BMIは体重から自動計算（身長は設定で変更）。</div>
+  </section>
+
+</div>
+
+<!-- ===== FLOAT ===== -->
+<div class="fabs">
+  <button class="fab" onclick="openBug()" title="不具合報告">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.3 4l-7 12A2 2 0 005 19h14a2 2 0 001.7-3l-7-12a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<!-- ===== SAVE ===== -->
+<div class="savestat" id="savestat"><span id="savestat-txt"></span></div>
+<div class="savebar">
+  <div class="in">
+    <button class="gear" onclick="openSettings()" title="設定">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.6 1.6 1.6 0 00-.9 1.5V22a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H10a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V10a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="saveBtn" id="saveBtn" onclick="save()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      スプレッドシートに保存
+    </button>
+  </div>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="mask" id="settingsMask">
+  <div class="sheet">
+    <div class="grip"></div>
+    <h2>設定</h2>
+    <div class="lead">最初に一度だけ、保存先（スプレッドシートのURL）をつないでください。</div>
+
+    <div class="setfld">
+      <label>① 保存先のウェブアプリURL</label>
+      <input type="url" id="set-url" placeholder="https://script.google.com/macros/s/.../exec">
+      <div class="hint">スプレッドシート → 拡張機能 → Apps Script でデプロイして得たURLを貼ってください（下の手順参照）。</div>
+    </div>
+    <div class="setfld">
+      <label>② あいことば（token）</label>
+      <input type="text" id="set-token" placeholder="merone-diet-2026">
+      <div class="hint">GAS側と同じ文字にします。初期値のままでOK。</div>
+    </div>
+
+    <div class="setgrid">
+      <div class="setfld"><label>お名前（任意）</label><input type="text" id="set-name" placeholder=""></div>
+      <div class="setfld"><label>身長 (cm)</label><input type="number" id="set-height" placeholder="164"></div>
+    </div>
+
+    <label style="font-size:12.5px;font-weight:800;display:block;margin:4px 0 8px">理想値（毎日の目標）</label>
+    <div class="setgrid">
+      <div class="setfld"><label>カロリー kcal</label><input type="number" id="set-i-kcal" placeholder="470"></div>
+      <div class="setfld"><label>プロテイン g</label><input type="number" id="set-i-pro" placeholder="80"></div>
+      <div class="setfld"><label>水分 ml</label><input type="number" id="set-i-water" placeholder="3000"></div>
+      <div class="setfld"><label>睡眠 時間</label><input type="number" id="set-i-sleep" placeholder="7"></div>
+      <div class="setfld"><label>入浴 分</label><input type="number" id="set-i-bath" placeholder="60"></div>
+      <div class="setfld"><label>有酸素 分</label><input type="number" id="set-i-aero" placeholder="60"></div>
+      <div class="setfld"><label>マッサージ 分</label><input type="number" id="set-i-mas" placeholder="60"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn o" onclick="selfCheck()">つながるかテスト</button>
+      <button class="btn p" onclick="saveSettings()">保存する</button>
+    </div>
+    <div class="chk" id="chkResult"></div>
+    <button class="btn g" style="margin-top:12px;width:100%" onclick="closeSettings()">とじる</button>
+
+    <details style="margin-top:16px">
+      <summary style="font-size:12.5px;font-weight:800;color:var(--pink-d);cursor:pointer">保存先のつなぎ方（2分・初回のみ）</summary>
+      <ol style="font-size:12px;color:var(--navy);line-height:1.85;padding-left:18px;margin-top:8px">
+        <li>スプレッドシートを開く → 上メニュー「拡張機能」→「Apps Script」</li>
+        <li>渡されたコード（Code.gs）を全部貼り付けて保存</li>
+        <li>右上「デプロイ」→「新しいデプロイ」→ 種類は「ウェブアプリ」</li>
+        <li>「次のユーザーとして実行：自分」「アクセスできるユーザー：全員」を選ぶ</li>
+        <li>「デプロイ」→ 一度だけ承認（自分のGoogleを許可）</li>
+        <li>表示された <b>ウェブアプリのURL（.../exec）</b> をコピーして、上の①に貼る</li>
+      </ol>
+    </details>
+  </div>
+</div>
+
+<!-- ===== BUG MODAL ===== -->
+<div class="mask" id="bugMask">
+  <div class="sheet">
+    <div class="grip"></div>
+    <h2>不具合の報告</h2>
+    <div class="lead">気づいたことを書いて送ってください。すぐ直します。</div>
+    <div class="setfld"><label>どんなことが起きましたか？</label>
+      <input type="text" id="bug-text" placeholder="例：保存を押しても反応しない">
+    </div>
+    <div class="btn-row">
+      <button class="btn g" onclick="closeBug()">とじる</button>
+      <button class="btn p" onclick="sendBug()">送信する</button>
+    </div>
+    <div class="chk" id="bugResult"></div>
+  </div>
+</div>
+
+<div id="dbg"></div>
+
+<script>
+/* =================== state / config =================== */
+var LS_SET='diet.settings.v1', LS_DRAFT='diet.draft.v1';
+var DEFAULT_IDEAL={kcal:470,pro:80,water:3000,sleep:7,bath:60,aero:60,mas:60};
+var settings={url:'',token:'merone-diet-2026',name:'',height:164,ideal:Object.assign({},DEFAULT_IDEAL)};
+var seg={haiben:'',benpi:''};
+
+var BODY_ROWS=[
+  {key:'weight',label:'体重',unit:'kg',goal:47,step:'0.1'},
+  {key:'fat',   label:'体脂肪',unit:'%',goal:22,step:'0.1'},
+  {key:'bmi',   label:'BMI',unit:'',goal:23,step:'0.01',auto:true},
+  {key:'water', label:'水分率',unit:'%',goal:57,step:'0.1'},
+  {key:'visc',  label:'内臓脂肪',unit:'',goal:7,step:'0.1'},
+  {key:'sub',   label:'皮下脂肪',unit:'%',goal:19,step:'0.1'},
+  {key:'muscle',label:'骨格筋',unit:'%',goal:null,step:'0.1'}
+];
+
+/* =================== init =================== */
+function init(){
+  loadSettings();
+  buildBody();
+  // date
+  var d=document.getElementById('date');
+  d.value = todayISO();
+  d.addEventListener('change', function(){ updateDow(); scheduleDraft(); });
+  updateDow();
+  // seg buttons
+  document.querySelectorAll('.seg').forEach(function(s){
+    s.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){
+        s.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+        b.classList.add('on'); seg[s.dataset.seg]=b.dataset.v; scheduleDraft();
+      });
+    });
+  });
+  // care inputs
+  ['sleepH','bath','aero','mas','taicho','wake','sleep-t'].forEach(function(id){
+    var el=document.getElementById(id); el.addEventListener('input',function(){recalc();scheduleDraft();});
+  });
+  // restore draft or seed a first meal
+  if(!restoreDraft()){
+    addMeal({time:'08:00'});
+  }
+  applyIdealLabels();
+  if(/[?&]demo=1/.test(location.search)){ seedDemo(); }
+  recalc();
+  // if no url yet, gently open settings
+  if(!settings.url && !/[?&]noauto=1/.test(location.search) && !/[?&]demo=1/.test(location.search)){ setTimeout(openSettings, 700); }
+}
+/* screenshot/preview seed only – never saved automatically */
+function seedDemo(){
+  document.getElementById('meals').innerHTML='';
+  [{time:'07:30',food:'ツナボール',kcal:47,protein:8,water:200},
+   {time:'10:00',food:'プロテイン',kcal:120,protein:20,water:300},
+   {time:'12:30',food:'鶏胸と玄米',kcal:380,protein:32,water:400},
+   {time:'15:00',food:'素焼きアーモンド',kcal:90,protein:4,water:200}
+  ].forEach(function(m){addMeal(m);});
+  document.getElementById('sleepH').value=7;
+  document.getElementById('bath').value=40;
+  document.getElementById('aero').value=30;
+  document.getElementById('mas').value=20;
+  setSeg('haiben','あり'); setSeg('benpi','なし');
+  document.getElementById('taicho').value='むくみスッキリ';
+  var demoBody={weight:60.2,fat:31.8,water:46.7,visc:5,sub:29.5,muscle:39.7};
+  Object.keys(demoBody).forEach(function(k){ var el=document.getElementById('bc-'+k); if(el)el.value=demoBody[k]; });
+  autoBMI();
+}
+
+/* =================== date helpers =================== */
+function pad(n){return (n<10?'0':'')+n;}
+function todayISO(){var t=new Date();return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());}
+var DOW=['日','月','火','水','木','金','土'];
+function updateDow(){
+  var v=document.getElementById('date').value; if(!v)return;
+  var p=v.split('-'); var dt=new Date(+p[0],+p[1]-1,+p[2]);
+  document.getElementById('dow').textContent='（'+DOW[dt.getDay()]+'）';
+  var greet=document.getElementById('greet');
+  var h=new Date().getHours();
+  greet.textContent = h<11?'おはよう。今日もていねいに ♪':h<17?'少しずつで大丈夫。よくがんばってる。':'今日もおつかれさま。ゆっくりいこう。';
+}
+
+/* =================== meals =================== */
+function addMeal(data){
+  data=data||{};
+  var wrap=document.getElementById('meals');
+  var el=document.createElement('div'); el.className='meal pop';
+  el.innerHTML=
+    '<button class="del" title="削除" onclick="this.parentNode.remove();recalc();scheduleDraft()">×</button>'+
+    '<div class="r1">'+
+      '<div class="fld tm"><label>時刻</label><input type="time" class="m-time" value="'+(data.time||'')+'"></div>'+
+      '<div class="fld food"><label>食べたもの</label><input type="text" class="m-food" placeholder="例：ツナボール" value="'+esc(data.food)+'"></div>'+
+    '</div>'+
+    '<div class="r2">'+
+      '<div class="fld"><label>カロリー</label><div class="unit"><input type="number" inputmode="numeric" class="m-kcal" placeholder="0" value="'+esc(data.kcal)+'"><span class="u">kcal</span></div></div>'+
+      '<div class="fld"><label>プロテイン</label><div class="unit"><input type="number" inputmode="decimal" class="m-pro" placeholder="0" value="'+esc(data.protein)+'"><span class="u">g</span></div></div>'+
+      '<div class="fld"><label>水分</label><div class="unit"><input type="number" inputmode="numeric" class="m-water" placeholder="0" value="'+esc(data.water)+'"><span class="u">ml</span></div></div>'+
+    '</div>';
+  wrap.appendChild(el);
+  el.querySelectorAll('input').forEach(function(i){i.addEventListener('input',function(){recalc();scheduleDraft();});});
+  recalc();
+}
+function esc(v){ if(v===undefined||v===null)return''; return String(v).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function getMeals(){
+  var out=[];
+  document.querySelectorAll('#meals .meal').forEach(function(m){
+    var time=m.querySelector('.m-time').value;
+    var food=m.querySelector('.m-food').value.trim();
+    var kcal=num(m.querySelector('.m-kcal').value);
+    var pro=num(m.querySelector('.m-pro').value);
+    var water=num(m.querySelector('.m-water').value);
+    if(time||food||kcal||pro||water) out.push({time:time,food:food,kcal:kcal,protein:pro,water:water});
+  });
+  return out;
+}
+function num(v){ v=parseFloat(v); return isNaN(v)?0:v; }
+
+/* =================== body table =================== */
+function buildBody(){
+  var box=document.getElementById('bodytbl');
+  BODY_ROWS.forEach(function(r){
+    var row=document.createElement('div'); row.className='brow';
+    row.innerHTML='<span class="bl">'+r.label+(r.unit?'('+r.unit+')':'')+'</span>'+
+      '<div class="fld"><input type="number" step="'+r.step+'" inputmode="decimal" id="bc-'+r.key+'" placeholder="'+(r.auto?'自動':'')+'"'+(r.auto?' readonly style="background:#f7f2f5"':'')+'></div>'+
+      '<div class="fld"><input type="number" step="'+r.step+'" inputmode="decimal" id="bg-'+r.key+'" placeholder="'+(r.goal===null?'—':r.goal)+'"></div>';
+    box.appendChild(row);
+  });
+  document.getElementById('bc-weight').addEventListener('input',autoBMI);
+}
+function autoBMI(){
+  var w=num(document.getElementById('bc-weight').value);
+  var h=settings.height/100;
+  var bmi=document.getElementById('bc-bmi');
+  if(w>0 && h>0){ bmi.value=Math.round(w/(h*h)*100)/100; } else { bmi.value=''; }
+}
+
+/* =================== recalc / rings =================== */
+function recalc(){
+  var meals=getMeals();
+  var kcal=0,pro=0,water=0;
+  meals.forEach(function(m){kcal+=m.kcal;pro+=m.protein;water+=m.water;});
+  var sleepH=num(document.getElementById('sleepH').value);
+  var bath=num(document.getElementById('bath').value);
+  var aero=num(document.getElementById('aero').value);
+  var mas=num(document.getElementById('mas').value);
+  var I=settings.ideal;
+  document.getElementById('mealcount').textContent='食事 '+meals.length+'回';
+  ring('ring-kcal','t-kcal',kcal,I.kcal);
+  ring('ring-pro','t-pro',pro,I.pro);
+  ring('ring-water','t-water',water,I.water);
+  bar('b-sleep','v-sleep',sleepH,I.sleep);
+  bar('b-bath','v-bath',bath,I.bath);
+  bar('b-aero','v-aero',aero,I.aero);
+  bar('b-mas','v-mas',mas,I.mas);
+  // cheer message
+  var done=(kcal>0?1:0)+(pro>=I.pro?1:0)+(water>=I.water?1:0)+(bath>=I.bath?1:0)+(aero>=I.aero?1:0);
+  var c=document.getElementById('cheer');
+  if(meals.length===0){c.textContent='きろくをはじめましょう ♪';}
+  else if(done>=4){c.textContent='今日はすごくいいバランス。えらい ♡';}
+  else if(water<I.water){c.textContent='お水があと '+Math.max(0,I.water-water)+'ml。ゆっくりでいいよ。';}
+  else if(pro<I.pro){c.textContent='プロテインあと '+Math.max(0,Math.round(I.pro-pro))+'g。あと少し ♪';}
+  else{c.textContent='いい調子。この積み重ねが体をつくるよ。';}
+}
+function ring(barId,txtId,val,goal){
+  var C=2*Math.PI*38; // ~238.7
+  var pct=goal>0?Math.min(1,val/goal):0;
+  var el=document.getElementById(barId);
+  el.setAttribute('stroke-dasharray',(C*pct).toFixed(1)+' '+C.toFixed(1));
+  document.getElementById(txtId).textContent=Math.round(val);
+}
+function bar(barId,txtId,val,goal){
+  var pct=goal>0?Math.min(100,val/goal*100):0;
+  document.getElementById(barId).style.width=pct+'%';
+  document.getElementById(txtId).textContent=(Math.round(val*10)/10);
+}
+function applyIdealLabels(){
+  var I=settings.ideal;
+  document.getElementById('g-kcal').textContent='/'+I.kcal;
+  document.getElementById('g-pro').textContent='/'+I.pro;
+  document.getElementById('g-water').textContent='/'+I.water;
+  document.getElementById('gg-sleep').textContent=I.sleep;
+  document.getElementById('gg-bath').textContent=I.bath;
+  document.getElementById('gg-aero').textContent=I.aero;
+  document.getElementById('gg-mas').textContent=I.mas;
+  // body goals
+  BODY_ROWS.forEach(function(r){
+    var g=document.getElementById('bg-'+r.key);
+    if(g && !g.value && r.goal!==null) g.placeholder=r.goal;
+  });
+}
+
+/* =================== settings =================== */
+function loadSettings(){
+  try{
+    var s=JSON.parse(localStorage.getItem(LS_SET)||'null');
+    if(s){ settings=Object.assign(settings,s); settings.ideal=Object.assign({},DEFAULT_IDEAL,s.ideal||{}); }
+  }catch(e){ window.__log('loadSettings: '+e.message,true); }
+}
+function openSettings(){
+  document.getElementById('set-url').value=settings.url||'';
+  document.getElementById('set-token').value=settings.token||'merone-diet-2026';
+  document.getElementById('set-name').value=settings.name||'';
+  document.getElementById('set-height').value=settings.height||164;
+  var I=settings.ideal;
+  document.getElementById('set-i-kcal').value=I.kcal;
+  document.getElementById('set-i-pro').value=I.pro;
+  document.getElementById('set-i-water').value=I.water;
+  document.getElementById('set-i-sleep').value=I.sleep;
+  document.getElementById('set-i-bath').value=I.bath;
+  document.getElementById('set-i-aero').value=I.aero;
+  document.getElementById('set-i-mas').value=I.mas;
+  document.getElementById('chkResult').className='chk';
+  document.getElementById('settingsMask').classList.add('on');
+}
+function closeSettings(){ document.getElementById('settingsMask').classList.remove('on'); }
+function saveSettings(){
+  settings.url=document.getElementById('set-url').value.trim();
+  settings.token=document.getElementById('set-token').value.trim()||'merone-diet-2026';
+  settings.name=document.getElementById('set-name').value.trim();
+  settings.height=num(document.getElementById('set-height').value)||164;
+  settings.ideal={
+    kcal:num(document.getElementById('set-i-kcal').value)||DEFAULT_IDEAL.kcal,
+    pro:num(document.getElementById('set-i-pro').value)||DEFAULT_IDEAL.pro,
+    water:num(document.getElementById('set-i-water').value)||DEFAULT_IDEAL.water,
+    sleep:num(document.getElementById('set-i-sleep').value)||DEFAULT_IDEAL.sleep,
+    bath:num(document.getElementById('set-i-bath').value)||DEFAULT_IDEAL.bath,
+    aero:num(document.getElementById('set-i-aero').value)||DEFAULT_IDEAL.aero,
+    mas:num(document.getElementById('set-i-mas').value)||DEFAULT_IDEAL.mas
+  };
+  localStorage.setItem(LS_SET,JSON.stringify(settings));
+  applyIdealLabels(); autoBMI(); recalc();
+  toast('設定を保存しました','ok');
+  closeSettings();
+}
+function selfCheck(){
+  var url=document.getElementById('set-url').value.trim();
+  var box=document.getElementById('chkResult');
+  if(!url){ box.className='chk err'; box.textContent='先にウェブアプリURLを入力してください。'; return; }
+  box.className='chk'; box.style.display='block'; box.textContent='確認中…';
+  fetch(url+(url.indexOf('?')>-1?'&':'?')+'ping=1',{method:'GET'})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.ok){ box.className='chk ok'; box.textContent='つながりました ♪ 保存の準備OKです（'+(j.name||'diet')+'）'; }
+      else{ box.className='chk err'; box.textContent='応答はありましたが想定と違います。URLを確認してください。'; }
+    })
+    .catch(function(e){
+      box.className='chk err';
+      box.textContent='つながりませんでした。URLが「/exec」で終わっているか、アクセス権が「全員」かご確認ください。';
+      window.__log('selfCheck: '+e.message,true);
+    });
+}
+
+/* =================== draft (autosave) =================== */
+var draftT=null;
+function scheduleDraft(){ clearTimeout(draftT); draftT=setTimeout(saveDraft,400); }
+function collect(){
+  var body={};
+  BODY_ROWS.forEach(function(r){
+    body[r.key]={cur:valOrNull('bc-'+r.key),goal:valOrNull('bg-'+r.key,r.goal)};
+  });
+  return {
+    date:document.getElementById('date').value,
+    wake:document.getElementById('wake').value,
+    sleepTime:document.getElementById('sleep-t').value,
+    taicho:document.getElementById('taicho').value.trim(),
+    haiben:seg.haiben, benpi:seg.benpi,
+    care:{sleepH:num(document.getElementById('sleepH').value),bath:num(document.getElementById('bath').value),aero:num(document.getElementById('aero').value),mas:num(document.getElementById('mas').value)},
+    meals:getMeals(),
+    body:body
+  };
+}
+function valOrNull(id,def){ var el=document.getElementById(id); if(!el)return null; var v=el.value; if(v===''||v===null)return (def===undefined?null:null); var n=parseFloat(v); return isNaN(n)?null:n; }
+function saveDraft(){ try{ localStorage.setItem(LS_DRAFT,JSON.stringify(collect())); }catch(e){} }
+function restoreDraft(){
+  try{
+    var d=JSON.parse(localStorage.getItem(LS_DRAFT)||'null');
+    if(!d) return false;
+    if(d.date && d.date!==todayISO()) return false; // only restore today's draft
+    if(d.date) document.getElementById('date').value=d.date;
+    if(d.wake) document.getElementById('wake').value=d.wake;
+    if(d.sleepTime) document.getElementById('sleep-t').value=d.sleepTime;
+    if(d.taicho) document.getElementById('taicho').value=d.taicho;
+    if(d.care){ document.getElementById('sleepH').value=d.care.sleepH||''; document.getElementById('bath').value=d.care.bath||''; document.getElementById('aero').value=d.care.aero||''; document.getElementById('mas').value=d.care.mas||''; }
+    if(d.haiben) setSeg('haiben',d.haiben);
+    if(d.benpi) setSeg('benpi',d.benpi);
+    if(d.body){ BODY_ROWS.forEach(function(r){ var b=d.body[r.key]; if(b){ if(b.cur!=null)document.getElementById('bc-'+r.key).value=b.cur; if(b.goal!=null)document.getElementById('bg-'+r.key).value=b.goal; } }); }
+    if(d.meals && d.meals.length){ d.meals.forEach(function(m){addMeal(m);}); } else { addMeal({time:'08:00'}); }
+    autoBMI();
+    return true;
+  }catch(e){ window.__log('restoreDraft: '+e.message,true); return false; }
+}
+function setSeg(name,v){
+  var s=document.querySelector('.seg[data-seg="'+name+'"]'); if(!s)return;
+  s.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on',b.dataset.v===v); });
+  seg[name]=v;
+}
+
+/* =================== save (POST) =================== */
+function save(){
+  if(!settings.url){ toast('先に設定で保存先URLをつないでね','err'); openSettings(); return; }
+  var meals=getMeals();
+  if(meals.length===0){ toast('食べたものを1つ以上入れてね','err'); return; }
+  var data=collect();
+  data.token=settings.token; data.name=settings.name; data.heightCm=settings.height;
+  data.ideal=settings.ideal; data.action='saveDay';
+  var btn=document.getElementById('saveBtn'); btn.disabled=true;
+  toast('保存中…');
+  fetch(settings.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      btn.disabled=false;
+      if(j&&j.ok){ toast('スプレッドシートに保存できました ♡','ok'); celebrate(); }
+      else{ toast((j&&j.error)?j.error:'保存に失敗しました','err'); }
+    })
+    .catch(function(e){
+      btn.disabled=false;
+      window.__log('save: '+e.message,true);
+      // opaque/CORS fallback: likely written; ask to verify
+      toast('送信しました。スプレッドシートをご確認ください','ok');
+    });
+}
+function toast(msg,type){
+  var s=document.getElementById('savestat');
+  document.getElementById('savestat-txt').textContent=msg;
+  s.className='savestat show'+(type?' '+type:'');
+  clearTimeout(toast._t); toast._t=setTimeout(function(){s.className='savestat'+(type?' '+type:'');},2600);
+}
+function celebrate(){
+  var box=document.querySelector('.hero'); if(!box)return;
+  box.animate?box.animate([{transform:'scale(1)'},{transform:'scale(1.012)'},{transform:'scale(1)'}],{duration:500}):0;
+}
+
+/* =================== bug report =================== */
+function openBug(){ document.getElementById('bug-text').value=''; document.getElementById('bugResult').className='chk'; document.getElementById('bugMask').classList.add('on'); }
+function closeBug(){ document.getElementById('bugMask').classList.remove('on'); }
+function sendBug(){
+  var txt=document.getElementById('bug-text').value.trim();
+  var box=document.getElementById('bugResult');
+  if(!txt){ box.className='chk err'; box.textContent='内容を入力してください。'; return; }
+  var payload={action:'bug',token:settings.token,text:txt,ua:navigator.userAgent,page:location.href,ts:new Date().toString()};
+  if(settings.url){
+    fetch(settings.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+      .then(function(){ box.className='chk ok'; box.textContent='送信しました。ありがとうございます ♪'; })
+      .catch(function(){ mailtoBug(txt); box.className='chk ok'; box.textContent='メールアプリを開きました。'; });
+  } else { mailtoBug(txt); box.className='chk ok'; box.textContent='メールアプリを開きました。'; }
+}
+function mailtoBug(txt){
+  var body=encodeURIComponent('【不具合】\n'+txt+'\n\n---\n'+navigator.userAgent+'\n'+location.href);
+  location.href='mailto:4morikawa5@gmail.com?subject='+encodeURIComponent('[Diet Log] 不具合報告')+'&body='+body;
+}
+
+/* =================== safe boot (runs last, after all definitions) =================== */
+(function(){
+  var DEBUG = /[?&]debug=1/.test(location.search);
+  var esc = document.getElementById('escape');
+  var escT = setTimeout(function(){ if(esc) esc.style.display='block'; }, 3500);
+  window.__log = function(m,err){
+    if(!DEBUG) return;
+    var d=document.getElementById('dbg'); if(!d) return; d.style.display='block';
+    d.innerHTML += (err?'<b>':'')+String(m)+(err?'</b>':'')+'\n'; d.scrollTop=d.scrollHeight;
+  };
+  window.addEventListener('error',function(e){ if(esc)esc.style.display='block'; if(window.__log)window.__log('ERROR: '+(e.message||e),true); });
+  window.addEventListener('unhandledrejection',function(e){ if(window.__log)window.__log('PROMISE: '+(e.reason&&e.reason.message||e.reason),true); });
+  try{
+    init();
+  }catch(e){
+    if(window.__log)window.__log('INIT FAIL: '+(e&&e.message),true);
+    if(esc) esc.style.display='block';
+  }finally{
+    clearTimeout(escT);
+    var b=document.getElementById('boot'); if(b) b.style.display='none';
+    if(esc) esc.style.display='none';
+  }
+})();
+</script>
+</body>
+</html>
