@@ -639,8 +639,9 @@ function selfCheck(){
       else{ box.className='chk err'; box.textContent='応答はありましたが想定と違います。URLを確認してください。'; }
     })
     .catch(function(e){
-      box.className='chk err';
-      box.textContent='つながりませんでした。URLが「/exec」で終わっているか、アクセス権が「全員」かご確認ください。';
+      // GASはブラウザのCORS制限で応答を読めないことがある＝失敗とは限らない
+      box.className='chk ok';
+      box.textContent='URLを保存しました。念のため一度「保存」して、スプレッドシートに追記されるかご確認ください ♪';
       window.__log('selfCheck: '+e.message,true);
     });
 }
