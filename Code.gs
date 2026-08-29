@@ -1,219 +1,142 @@
 /*************************************************************
- *  Daily Diet Log  →  スプレッドシート自動追記 GAS
+ *  Daily Diet Log v2  →  1日1タブに「1件ずつ」追記するGAS
  *  ------------------------------------------------------------
- *  使い方（初回のみ・2分）
- *   1. 記録したいスプレッドシートを開く
- *   2. 拡張機能 → Apps Script
- *   3. このコードを全部貼り付けて保存（フロッピー保存）
- *   4. 右上「デプロイ」→「新しいデプロイ」→ 種類「ウェブアプリ」
- *   5. 「次のユーザーとして実行：自分」「アクセス：全員」→ デプロイ
- *   6. 一度だけ承認 → 表示された「ウェブアプリのURL(.../exec)」をコピー
- *   7. 入力サイトの ⚙設定 に貼る。以上！
- *
- *  ※ 入力サイトの「あいことば」と下の TOKEN は同じ文字にしてください。
+ *  貼り方（初回/更新とも同じ）
+ *   1. 記録スプレッドシートを開く → 拡張機能 → Apps Script
+ *   2. このコードを全部貼り付けて保存
+ *   3. デプロイ → デプロイを管理 → 鉛筆✎ → バージョン「新バージョン」→ デプロイ
+ *      （初回は「新しいデプロイ」→ ウェブアプリ / 実行:自分 / アクセス:全員）
+ *   ※ URLは変わりません。あいことば(TOKEN)は下と入力サイトを一致させる
  *************************************************************/
 
-var TOKEN = 'merone-diet-2026';        // 入力サイトの token と一致させる
-var BUG_SHEET_NAME = '不具合ログ';
+var TOKEN = 'merone-diet-2026';
+var TZ = 'Asia/Tokyo';
+var HEADER = ['時刻','食べたもの','カロリー(kcal)','プロテイン(g)','水分(ml)','体重(kg)','睡眠(h)','メモ'];
+var BUG_SHEET = '不具合ログ';
 
-// 体組成の並び順（入力サイトと一致）
-var BODY_ORDER = [
-  { key:'weight', label:'体重(kg)' },
-  { key:'fat',    label:'体脂肪(%)' },
-  { key:'bmi',    label:'BMI' },
-  { key:'water',  label:'水分率(%)' },
-  { key:'visc',   label:'内臓脂肪' },
-  { key:'sub',    label:'皮下脂肪(%)' },
-  { key:'muscle', label:'骨格筋(%)' }
-];
-
-/* ============ エントリポイント ============ */
-function doGet(e) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    return json({ ok:true, name:'merone-diet', title:ss.getName(), blocks:countBlocks_(ss.getSheets()[0]) });
-  } catch (err) {
-    return json({ ok:false, error:String(err) });
-  }
+/* ===== entry points ===== */
+function doGet(e){
+  try{
+    var p=(e&&e.parameter)||{};
+    if(p.date) return json(getDay_(p.date));
+    return json({ok:true, name:'merone-diet2', title:ss_().getName()});
+  }catch(err){ return json({ok:false, error:String(err)}); }
 }
 
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    if (data.token !== TOKEN) return json({ ok:false, error:'あいことば(token)が違います' });
-
-    if (data.action === 'bug') { logBug_(data); return json({ ok:true }); }
-
-    // 既定：1日ぶんを保存
-    var row = saveDay_(data);
-    return json({ ok:true, row:row, message:'保存しました' });
-  } catch (err) {
-    return json({ ok:false, error:String(err) });
-  }
+function doPost(e){
+  try{
+    var d=JSON.parse(e.postData.contents);
+    if(d.token!==TOKEN) return json({ok:false, error:'あいことば(token)が違います'});
+    switch(d.action){
+      case 'addEntry':    return json(addEntry_(d));
+      case 'getDay':      return json(getDay_(d.date));
+      case 'deleteEntry': return json(deleteEntry_(d));
+      case 'setupTabs':   return json(setupTabs_());
+      case 'bug':         logBug_(d); return json({ok:true});
+      default:            return json({ok:false, error:'unknown action: '+d.action});
+    }
+  }catch(err){ return json({ok:false, error:String(err)}); }
 }
 
-/* ============ 1日ブロックを追記 ============ */
-function saveDay_(d) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  var blockNo = countBlocks_(sheet) + 1;
-
-  var meals  = d.meals || [];
-  var care   = d.care  || {};
-  var I      = normIdeal_(d.ideal);
-  var body   = d.body  || {};
-
-  // 合計
-  var sum = { kcal:0, pro:0, water:0 };
-  meals.forEach(function(m){ sum.kcal += n_(m.kcal); sum.pro += n_(m.protein); sum.water += n_(m.water); });
-  var sleepH = n_(care.sleepH), bath = n_(care.bath), aero = n_(care.aero), mas = n_(care.mas);
-
-  // 前日・当初（既存ブロックから）
-  var refs = getBodyRefs_(sheet);   // {prev:{}, base:{}}
-
-  var R = [];  // 9列 × N行
-  R.push(row9_('Day' + blockNo, fmtDate_(d.date), '', '', '', '', '', '氏名', d.name || ''));
-  R.push(blank9_());
-  R.push(row9_('', '', '', '', '', '', '', '排便有無', d.haiben || ''));
-  R.push(row9_('', '', '', '', '', '', '', '便秘薬摂取', d.benpi || ''));
-  R.push(row9_('', '', '', '', '', '', '', '体調', d.taicho || ''));
-  R.push(row9_('時刻','食事','カロリー(kcal)','プロテイン(g)','水(ml)','睡眠時間','入浴(m)','有酸素運動(m)','マッサージ(m)'));
-
-  // 起床行：入浴・有酸素・マッサージの合計をここに置く（列合計が総量と一致）
-  R.push(row9_(fmtTime_(d.wake), '', '', '', '', '起床', bath || '', aero || '', mas || ''));
-
-  // 食事の行
-  meals.forEach(function(m){
-    R.push(row9_(fmtTime_(m.time), m.food || '', blankNum_(m.kcal), blankNum_(m.protein), blankNum_(m.water), '', '', '', ''));
-  });
-
-  // 就寝行
-  R.push(row9_(fmtTime_(d.sleepTime), '', '', '', '', '就寝', '', '', ''));
-
-  // 集計ブロック
-  R.push(row9_('→食事回数：', meals.length, '', '', '', (sleepH ? sleepH + '時間' : ''), '', '', ''));
-  R.push(row9_('', '合計', sum.kcal, round1_(sum.pro), sum.water, sleepH, bath, aero, mas));
-  R.push(row9_('', '理想', I.kcal, I.pro, I.water, I.sleep, I.bath, I.aero, I.mas));
-  R.push(row9_('', '差分', sum.kcal - I.kcal, round1_(sum.pro - I.pro), sum.water - I.water, sleepH - I.sleep, bath - I.bath, aero - I.aero, mas - I.mas));
-  R.push(row9_('', '累計', sum.kcal, round1_(sum.pro), sum.water, sleepH, bath, '', ''));
-  R.push(blank9_());
-
-  // 体組成
-  R.push(row9_('', '前日', '当日', '前日比', '当初比*', '目標', '差分(残り)', '', ''));
-  BODY_ORDER.forEach(function(b){
-    var cur  = pick_(body[b.key], 'cur');
-    var goal = pick_(body[b.key], 'goal');
-    var prev = refs.prev[b.key];
-    var base = refs.base[b.key];
-    if (base === undefined || base === null) base = cur;   // 初回は当日＝当初
-    var zenpi   = (prev != null && cur != null) ? round2_(cur - prev) : '';
-    var nokori  = (goal != null && cur != null) ? round2_(goal - cur) : '';
-    R.push(row9_(b.label, nz_(prev), nz_(cur), zenpi, nz_(base), nz_(goal), nokori, '', ''));
-  });
-  R.push(row9_('', '', '', '', '*Day 0との比較', '', '', '', ''));
-
-  // 追記位置（既存の下に2行あけて）
-  var last = sheet.getLastRow();
-  var start = (last > 0) ? last + 3 : 1;
-  sheet.getRange(start, 1, R.length, 9).setValues(R);
-
-  formatBlock_(sheet, start, R.length);
-  return start;
+/* ===== 期の判定・タブ名 ===== */
+function phaseOf_(date){
+  if(date>='2026-08-28' && date<='2026-08-30') return '分析期';
+  if(date>='2026-08-31' && date<='2026-09-10') return '減量期';
+  if(date>='2026-09-11' && date<='2026-09-27') return '分析期';
+  return '';
+}
+function tabName_(date){
+  var p=String(date).split('-');
+  var name=Number(p[1])+'/'+Number(p[2]);
+  var ph=phaseOf_(date);
+  return ph ? name+' '+ph : name;
+}
+function findTab_(date){
+  var ss=ss_(), name=tabName_(date);
+  return ss.getSheetByName(name) || ss.getSheetByName(name.replace(/\//g,'-'));
+}
+function getOrCreateDayTab_(date){
+  var sh=findTab_(date);
+  if(sh) return sh;
+  var ss=ss_(), name=tabName_(date), created;
+  try{ created=ss.insertSheet(name); }
+  catch(e){ name=name.replace(/\//g,'-'); created=ss.getSheetByName(name)||ss.insertSheet(name); }
+  initTab_(created, date);
+  return created;
+}
+function initTab_(sh, date){
+  sh.getRange(1,1,1,HEADER.length).setValues([HEADER]).setFontWeight('bold').setBackground('#f7c6d4').setHorizontalAlignment('center');
+  sh.setFrozenRows(1);
+  try{ sh.setColumnWidth(1,64); sh.setColumnWidth(2,200); sh.setColumnWidth(8,180); }catch(e){}
+  try{ sh.getRange('A1').setNote('日付: '+date+' / '+(phaseOf_(date)||'期間外')); }catch(e){}
 }
 
-/* ============ 既存ブロック参照（前日・当初） ============ */
-function getBodyRefs_(sheet) {
-  var out = { prev:{}, base:{} };
-  var last = sheet.getLastRow();
-  if (last < 1) return out;
-  var colA = sheet.getRange(1, 1, last, 1).getValues();       // ラベル列
-  var colC = sheet.getRange(1, 3, last, 1).getValues();       // 当日列
-  var weightRows = [];
-  for (var i = 0; i < colA.length; i++) {
-    if (String(colA[i][0]).indexOf('体重') === 0) weightRows.push(i);   // 0-based
+/* ===== 1件追記 ===== */
+function addEntry_(d){
+  var sh=getOrCreateDayTab_(d.date);
+  sh.appendRow([ d.time||'', d.food||'', bn_(d.kcal), bn_(d.protein), bn_(d.water), bn_(d.weight), bn_(d.sleep), d.memo||'' ]);
+  return objAssign_({ok:true}, getDay_(d.date));
+}
+
+/* ===== その日の一覧＋合計 ===== */
+function getDay_(date){
+  var sh=findTab_(date);
+  var out={ ok:true, date:date, tab:tabName_(date), rows:[], total:{kcal:0,protein:0,water:0}, count:0, weight:'' };
+  if(!sh) return out;
+  var last=sh.getLastRow();
+  if(last<2) return out;
+  var vals=sh.getRange(2,1,last-1,HEADER.length).getValues();
+  for(var i=0;i<vals.length;i++){
+    var r=vals[i];
+    if(String(r.join(''))==='') continue;
+    out.rows.push({ row:i+2, time:fmtCell_(r[0]), food:r[1], kcal:n_(r[2]), protein:n_(r[3]), water:n_(r[4]), weight:r[5]===''?'':n_(r[5]), sleep:r[6]===''?'':n_(r[6]), memo:r[7] });
+    out.total.kcal+=n_(r[2]); out.total.protein+=n_(r[3]); out.total.water+=n_(r[4]);
+    if(r[5]!=='' && out.weight==='') out.weight=n_(r[5]);
   }
-  if (!weightRows.length) return out;
-  var firstW = weightRows[0];
-  var lastW  = weightRows[weightRows.length - 1];
-  BODY_ORDER.forEach(function(b, idx){
-    var pv = colC[lastW + idx] ? colC[lastW + idx][0] : '';
-    var bv = colC[firstW + idx] ? colC[firstW + idx][0] : '';
-    out.prev[b.key] = (pv === '' ? null : Number(pv));
-    out.base[b.key] = (bv === '' ? null : Number(bv));
-  });
+  out.total.protein=Math.round(out.total.protein*10)/10;
+  out.count=out.rows.length;
   return out;
 }
 
-function countBlocks_(sheet) {
-  var last = sheet.getLastRow();
-  if (last < 1) return 0;
-  var colH = sheet.getRange(1, 8, last, 1).getValues();   // 「氏名」がブロックに1つ
-  var c = 0;
-  for (var i = 0; i < colH.length; i++) if (String(colH[i][0]).indexOf('氏名') === 0) c++;
-  return c;
+/* ===== 1件削除 ===== */
+function deleteEntry_(d){
+  var sh=findTab_(d.date);
+  if(sh && d.row>=2 && d.row<=sh.getLastRow()) sh.deleteRow(d.row);
+  return objAssign_({ok:true}, getDay_(d.date));
 }
 
-/* ============ 見た目を整える ============ */
-function formatBlock_(sheet, start, len) {
-  try {
-    // ブロック全体うっすら枠
-    sheet.getRange(start, 1, len, 9).setVerticalAlignment('middle');
-    // タイトル行
-    sheet.getRange(start, 1, 1, 9).setBackground('#f7c6d4').setFontWeight('bold');
-    // 表ヘッダー（時刻…の行 = start+5）
-    sheet.getRange(start + 5, 1, 1, 9).setBackground('#fdeef2').setFontWeight('bold').setHorizontalAlignment('center');
-    // ラベル系太字
-    sheet.getRange(start + 2, 8, 3, 1).setFontWeight('bold');   // 排便/便秘薬/体調
-    // 集計ラベル列を太字（合計/理想/差分/累計 が入る B 列付近）
-  } catch (e) { /* 書式は失敗しても致命的でない */ }
+/* ===== 8/28〜9/27のタブを一括生成 ===== */
+function setupTabs_(){
+  var made=[];
+  for(var i=0;i<31;i++){
+    var dt=new Date(2026,7,28+i,12,0,0);                 // Aug=7. 8/28 + i
+    var date=Utilities.formatDate(dt, TZ, 'yyyy-MM-dd');
+    if(!findTab_(date)){ getOrCreateDayTab_(date); made.push(tabName_(date)); }
+  }
+  return { ok:true, created:made.length, tabs:made };
 }
 
-/* ============ 不具合ログ ============ */
-function logBug_(d) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = ss.getSheetByName(BUG_SHEET_NAME);
-  if (!sh) { sh = ss.insertSheet(BUG_SHEET_NAME); sh.appendRow(['日時','内容','端末','ページ']); }
-  sh.appendRow([new Date(), d.text || '', d.ua || '', d.page || '']);
+/* ===== bug ===== */
+function logBug_(d){
+  var ss=ss_(), sh=ss.getSheetByName(BUG_SHEET);
+  if(!sh){ sh=ss.insertSheet(BUG_SHEET); sh.appendRow(['日時','内容','端末','ページ']); }
+  sh.appendRow([new Date(), d.text||'', d.ua||'', d.page||'']);
 }
 
-/* ============ ユーティリティ ============ */
-function json(obj){ return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
-function n_(v){ v = parseFloat(v); return isNaN(v) ? 0 : v; }
-function nz_(v){ return (v === null || v === undefined || v === '') ? '' : v; }
-function blankNum_(v){ v = parseFloat(v); return isNaN(v) ? '' : v; }
-function pick_(o, k){ return (o && o[k] !== undefined && o[k] !== null && o[k] !== '') ? Number(o[k]) : null; }
-function round1_(v){ return Math.round(n_(v) * 10) / 10; }
-function round2_(v){ return Math.round(n_(v) * 100) / 100; }
-function row9_(a,b,c,d,e,f,g,h,i){ return [a,b,c,d,e,f,g,h,i]; }
-function blank9_(){ return ['','','','','','','','','']; }
-function normIdeal_(I){
-  I = I || {};
-  return { kcal:n_(I.kcal)||470, pro:n_(I.pro)||80, water:n_(I.water)||3000,
-           sleep:n_(I.sleep)||7, bath:n_(I.bath)||60, aero:n_(I.aero)||60, mas:n_(I.mas)||60 };
+/* ===== utils ===== */
+function ss_(){ return SpreadsheetApp.getActiveSpreadsheet(); }
+function json(o){ return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function n_(v){ v=parseFloat(v); return isNaN(v)?0:v; }
+function bn_(v){ v=parseFloat(v); return isNaN(v)?'':v; }
+function fmtCell_(v){
+  if(v instanceof Date){ return Utilities.formatDate(v, TZ, 'H:mm'); }
+  return v;
 }
-function fmtDate_(iso){
-  if (!iso) return '';
-  var p = String(iso).split('-');
-  if (p.length !== 3) return iso;
-  return Number(p[0]) + '.' + Number(p[1]) + '.' + Number(p[2]);   // 2026.8.29
-}
-function fmtTime_(t){
-  if (!t) return '';
-  var p = String(t).split(':');
-  if (p.length < 2) return t;
-  return Number(p[0]) + ':' + p[1];   // 07:00 -> 7:00
-}
+function objAssign_(a,b){ for(var k in b){ if(b.hasOwnProperty(k)) a[k]=b[k]; } return a; }
 
-/* ============ 動作テスト（任意）============ */
-function testWrite() {
-  var demo = {
-    token: TOKEN, action:'saveDay', date:'2026-08-29', name:'テスト',
-    haiben:'あり', benpi:'なし', taicho:'スッキリ', wake:'07:00', sleepTime:'00:00',
-    care:{ sleepH:7, bath:60, aero:30, mas:60 },
-    ideal:{ kcal:470, pro:80, water:3000, sleep:7, bath:60, aero:60, mas:60 },
-    meals:[ {time:'08:00',food:'ツナボール',kcal:47,protein:8,water:200},
-            {time:'12:00',food:'鶏胸',kcal:120,protein:25,water:300} ],
-    body:{ weight:{cur:60.2,goal:47}, fat:{cur:31.8,goal:22}, bmi:{cur:22.38,goal:23},
-           water:{cur:46.7,goal:57}, visc:{cur:5,goal:7}, sub:{cur:29.5,goal:19}, muscle:{cur:39.7,goal:null} }
-  };
-  Logger.log('書込行: ' + saveDay_(demo));
+/* ===== 動作テスト（任意）===== */
+function testAll(){
+  Logger.log(setupTabs_());
+  Logger.log(addEntry_({date:'2026-08-29', time:'8:00', food:'テスト', kcal:100, protein:5, water:200, weight:60.2, sleep:7, memo:'テスト'}));
+  Logger.log(getDay_('2026-08-29'));
 }
