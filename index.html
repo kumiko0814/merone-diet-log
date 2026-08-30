@@ -70,6 +70,13 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--pink);outline-of
 .recBtn:active{transform:scale(.98)}
 .recBtn[disabled]{opacity:.5}
 .recBtn.bodyBtn{background:linear-gradient(135deg,#8fd3c0,#5cb99f);box-shadow:0 9px 22px rgba(92,185,159,.34)}
+.grid2seg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{display:block;font-size:12px;font-weight:800;color:var(--navy-soft);margin-bottom:6px;padding-left:2px}
+.seg{display:flex;background:#f4eaf0;border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;min-width:0;padding:10px 4px;border-radius:9px;font-weight:800;font-size:13px;color:var(--navy-soft)}
+.seg button.on{background:#fff;color:var(--pink-d);box-shadow:var(--shadow-s)}
+.secttl{font-size:12.5px;font-weight:800;color:var(--pink-d);margin:15px 0 9px;padding-bottom:6px;border-bottom:1.5px solid var(--line)}
+.hintnote{font-size:11px;color:var(--navy-soft);margin-top:9px;font-weight:600}
 
 /* history */
 .hist{display:flex;flex-direction:column;gap:9px}
@@ -194,27 +201,37 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--pink);outline-of
       <div class="fld"><label>水分</label><div class="unit"><input type="number" inputmode="numeric" id="water" placeholder="0"><span class="u">ml</span></div></div>
     </div>
 
-    <button class="more" id="moreBtn" onclick="toggleMore()">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      メモを追加
-    </button>
-    <div id="moreBox" class="hidden">
-      <div class="fld" style="margin-top:8px"><label>メモ(任意)</label><input type="text" id="memo" placeholder="体調・気分・場所など"></div>
-    </div>
-
     <button class="recBtn" id="recBtn" onclick="record()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       記録する
     </button>
   </section>
 
-  <!-- morning body -->
+  <!-- daily body & care -->
   <section class="card">
     <div class="ttl">
       <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="2"/><path d="M8 6V4M16 6V4M9 12h6M12 12v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <h2>朝の計測</h2>
+      <h2>今日のからだ・ケア</h2>
       <span class="sub" style="flex:0 0 auto">1日1回</span>
     </div>
+
+    <div class="grid2seg">
+      <div><label class="mini">排便</label><div class="seg" data-seg="haiben"><button type="button" data-v="あり">あり</button><button type="button" data-v="なし">なし</button></div></div>
+      <div><label class="mini">便秘薬</label><div class="seg" data-seg="benpi"><button type="button" data-v="あり">あり</button><button type="button" data-v="なし">なし</button></div></div>
+    </div>
+    <div class="fld" style="margin-top:12px"><label>体調・ひとこと</label><input type="text" id="taicho" placeholder="スッキリ / むくみ など"></div>
+
+    <div class="secttl">ケア</div>
+    <div class="row2">
+      <div class="fld"><label>睡眠</label><div class="unit"><input type="number" step="0.5" inputmode="decimal" id="bc-sleep" placeholder="—"><span class="u">時間</span></div></div>
+      <div class="fld"><label>入浴</label><div class="unit"><input type="number" inputmode="numeric" id="care-bath" placeholder="—"><span class="u">分</span></div></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>有酸素運動</label><div class="unit"><input type="number" inputmode="numeric" id="care-aero" placeholder="—"><span class="u">分</span></div></div>
+      <div class="fld"><label>マッサージ</label><div class="unit"><input type="number" inputmode="numeric" id="care-mas" placeholder="—"><span class="u">分</span></div></div>
+    </div>
+
+    <div class="secttl">体組成</div>
     <div class="row2">
       <div class="fld"><label>体重</label><div class="unit"><input type="number" step="0.1" inputmode="decimal" id="bc-weight" placeholder="—"><span class="u">kg</span></div></div>
       <div class="fld"><label>体脂肪</label><div class="unit"><input type="number" step="0.1" inputmode="decimal" id="bc-fat" placeholder="—"><span class="u">%</span></div></div>
@@ -227,15 +244,13 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--pink);outline-of
       <div class="fld"><label>内臓脂肪</label><input type="number" step="0.1" inputmode="decimal" id="bc-visc" placeholder="—"></div>
       <div class="fld"><label>皮下脂肪</label><div class="unit"><input type="number" step="0.1" inputmode="decimal" id="bc-sub" placeholder="—"><span class="u">%</span></div></div>
     </div>
-    <div class="row2">
-      <div class="fld"><label>骨格筋</label><div class="unit"><input type="number" step="0.1" inputmode="decimal" id="bc-muscle" placeholder="—"><span class="u">%</span></div></div>
-      <div class="fld"><label>睡眠</label><div class="unit"><input type="number" step="0.5" inputmode="decimal" id="bc-sleep" placeholder="—"><span class="u">時間</span></div></div>
-    </div>
-    <button class="recBtn bodyBtn" id="bodyBtn" onclick="saveMorning()">
+    <div class="fld"><label>骨格筋</label><div class="unit"><input type="number" step="0.1" inputmode="decimal" id="bc-muscle" placeholder="—"><span class="u">%</span></div></div>
+
+    <button class="recBtn bodyBtn" id="bodyBtn" onclick="saveDaily()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      朝の計測を保存
+      からだ・ケアを保存
     </button>
-    <div style="font-size:11px;color:var(--navy-soft);margin-top:9px;font-weight:600">前日比・当初比・差分はスプレッドシート側で自動計算。BMIは体重から自動（身長は⚙設定）。</div>
+    <div class="hintnote">前日比・当初比・差分はスプレッドシートが自動計算。BMIは体重から自動（身長は⚙設定）。</div>
   </section>
 
   <!-- history -->
@@ -298,49 +313,51 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--pink);outline-of
         <li>デプロイ → デプロイを管理 → 鉛筆✎ → バージョン「新バージョン」→ デプロイ（URLは変わりません）</li>
       </ol>
       <textarea id="gascode" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">/*************************************************************
- *  Daily Diet Log v3  →  各日タブ=「分析ブロック(上)＋食事ログ(下)」
+ *  Daily Diet Log v4  →  各日タブ＝元テンプレートを完全再現
  *  ------------------------------------------------------------
  *  貼り方（更新も同じ）
  *   1. スプレッドシート → 拡張機能 → Apps Script
  *   2. 全部貼り付けて保存
- *   3. デプロイ → デプロイを管理 → 鉛筆✎ → バージョン「新バージョン」→ デプロイ
- *      （URLは変わりません。TOKENは入力サイトと一致させる）
+ *   3. デプロイ → デプロイを管理 → 鉛筆 → バージョン「新バージョン」→ デプロイ
  *
- *  タブ構成（各日）:
- *   1行目 : タイトル（例 8月28日（金） 分析期）
- *   3-10行: 体組成テーブル（前日・当日・前日比・当初比・目標・差分）
- *   12-16行: カロリー等の 合計/理想/差分/累計（合計はログから自動集計）
- *   18行目 : ログ見出し（時刻/食べたもの/カロリー/プロテイン/水分/メモ）
- *   19行目〜: 記録（1件=1行・下に追記）
+ *  タブの構成（元の減量期Day1と同じ）:
+ *   1行目 : A=タイトル / B=日付 / H=氏名(ラベル) I=氏名(値)
+ *   3-5行 : H=排便有無/便秘薬摂取/体調 (ラベル) I=値
+ *   6行目 : 緑ヘッダー 時刻/食事/カロリー/プロテイン/水/睡眠時間/入浴/有酸素運動/マッサージ
+ *   7-36行: 記録エリア(30行・1件=1行で埋める)
+ *   37行 : 食事回数
+ *   38-41: 合計/理想/差分/累計
+ *   43-50: 体組成(前日/当日/前日比/当初比/目標/差分)  オレンジ見出し
+ *   51行 : Day0との比較 注記
  *************************************************************/
 
 var TOKEN = 'merone-diet-2026';
 var TZ = 'Asia/Tokyo';
 var BUG_SHEET = '不具合ログ';
 
-var LOG_HEADER = ['時刻','食べたもの','カロリー(kcal)','プロテイン(g)','水分(ml)','メモ'];
-var LOG_HEAD_ROW = 18;
-var LOG_START = 19;
+// レイアウト行
+var HDR_ROW=6, LOG_TOP=7, LOG_BOT=36;
+var CNT_ROW=37, SUM_ROW=38, IDEAL_ROW=39, DIFF_ROW=40, CUM_ROW=41;
+var BODY_HDR=43, BODY_TOP=44, NOTE_ROW=51;
 
-// 体組成（key,label,目標）  行4〜10
+var LOG_HDR = ['時刻','食事','カロリー(kcal)','プロテイン(g)','水(ml)','睡眠時間','入浴(m)','有酸素運動(m)','マッサージ(m)'];
+// 体組成 [label, 目標]   行44〜50 / 当日=C列
 var BODY = [
-  ['weight','体重(kg)',47],
-  ['fat','体脂肪(%)',22],
-  ['bmi','BMI',22],
-  ['water','水分率(%)',57],
-  ['visc','内臓脂肪',7],
-  ['sub','皮下脂肪(%)',19],
-  ['muscle','骨格筋(%)','']
+  ['体重(kg)','weight',47],
+  ['体脂肪(%)','fat',22],
+  ['BMI','bmi',23],
+  ['水分率(%)','water',57],
+  ['内臓脂肪','visc',7],
+  ['皮下脂肪','sub',19],
+  ['骨格筋(%)','muscle','']
 ];
-var BODY_START = 4;
-var SLEEP_CELL = [13,5];   // 合計行の睡眠(h)  E13
 
 /* ===== entry points ===== */
 function doGet(e){
   try{
     var p=(e&amp;&amp;e.parameter)||{};
     if(p.date) return json(getDay_(p.date));
-    return json({ok:true, name:'merone-diet3', title:ss_().getName()});
+    return json({ok:true, name:'merone-diet4', title:ss_().getName()});
   }catch(err){ return json({ok:false, error:String(err)}); }
 }
 function doPost(e){
@@ -349,7 +366,7 @@ function doPost(e){
     if(d.token!==TOKEN) return json({ok:false, error:'あいことば(token)が違います'});
     switch(d.action){
       case 'addEntry':    return json(addEntry_(d));
-      case 'saveBody':    return json(saveBody_(d));
+      case 'saveDaily':   return json(saveDaily_(d));
       case 'getDay':      return json(getDay_(d.date));
       case 'deleteEntry': return json(deleteEntry_(d));
       case 'setupTabs':   return json(setupTabs_());
@@ -359,150 +376,164 @@ function doPost(e){
   }catch(err){ return json({ok:false, error:String(err)}); }
 }
 
-/* ===== 期・タブ名 ===== */
+/* ===== 期・タブ名・日付 ===== */
 function phaseOf_(date){
   if(date&gt;='2026-08-28' &amp;&amp; date&lt;='2026-08-30') return '分析期';
   if(date&gt;='2026-08-31' &amp;&amp; date&lt;='2026-09-10') return '減量期';
   if(date&gt;='2026-09-11' &amp;&amp; date&lt;='2026-09-27') return '分析期';
   return '';
 }
-function tabName_(date){
-  var p=String(date).split('-');
-  var nm=Number(p[1])+'/'+Number(p[2]);
-  var ph=phaseOf_(date);
-  return ph ? nm+' '+ph : nm;
-}
+function tabName_(date){ var p=String(date).split('-'); var nm=Number(p[1])+'/'+Number(p[2]); var ph=phaseOf_(date); return ph?nm+' '+ph:nm; }
 function tabTitle_(date){
-  var p=String(date).split('-');
-  var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
-  var dow=['日','月','火','水','木','金','土'][d.getDay()];
-  var ph=phaseOf_(date);
+  var p=String(date).split('-'); var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
+  var dow=['日','月','火','水','木','金','土'][d.getDay()]; var ph=phaseOf_(date);
   return Number(p[1])+'月'+Number(p[2])+'日（'+dow+'）'+(ph?'　'+ph:'');
 }
-function findTab_(date){
-  var ss=ss_(), name=tabName_(date);
-  return ss.getSheetByName(name) || ss.getSheetByName(name.replace(/\//g,'-'));
-}
+function dotDate_(date){ var p=String(date).split('-'); return Number(p[0])+'.'+Number(p[1])+'.'+Number(p[2]); }
+function findTab_(date){ var ss=ss_(),n=tabName_(date); return ss.getSheetByName(n)||ss.getSheetByName(n.replace(/\//g,'-')); }
 function getOrCreateDayTab_(date){
-  var sh=findTab_(date);
-  if(sh) return sh;
+  var sh=findTab_(date); if(sh) return sh;
   var ss=ss_(), name=tabName_(date), c;
-  try{ c=ss.insertSheet(name); }
-  catch(e){ name=name.replace(/\//g,'-'); c=ss.getSheetByName(name)||ss.insertSheet(name); }
-  buildTemplate_(c, date);
-  return c;
+  try{ c=ss.insertSheet(name); }catch(e){ name=name.replace(/\//g,'-'); c=ss.getSheetByName(name)||ss.insertSheet(name); }
+  buildTemplate_(c, date); return c;
 }
+function colL_(c){ return String.fromCharCode(64+c); }   // 1-&gt;A
 
-/* ===== テンプレ生成（分析ブロック） ===== */
+/* ===== テンプレート（元の完全再現） ===== */
 function buildTemplate_(sh, date){
   sh.clear();
-  // タイトル
-  sh.getRange(1,1,1,7).merge().setValue(tabTitle_(date)).setFontWeight('bold').setBackground('#f7c6d4').setHorizontalAlignment('center');
+  // 1行目
+  sh.getRange(1,1).setValue(tabTitle_(date)).setFontWeight('bold');
+  sh.getRange(1,2).setValue(dotDate_(date));
+  sh.getRange(1,8).setValue('氏名').setFontWeight('bold').setHorizontalAlignment('right');
+  // 3-5 ラベル
+  sh.getRange(3,8).setValue('排便有無').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(4,8).setValue('便秘薬摂取').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(5,8).setValue('体調').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(1,9,5,1).setBorder(true,true,true,true,false,false);   // 氏名〜体調の値枠
+  // 緑ヘッダー
+  sh.getRange(HDR_ROW,1,1,9).setValues([LOG_HDR]).setFontWeight('bold').setBackground('#8cff6b').setHorizontalAlignment('center');
+  // 記録エリア枠
+  sh.getRange(HDR_ROW,1,LOG_BOT-HDR_ROW+1,9).setBorder(true,true,true,true,true,true);
+  // 食事回数
+  sh.getRange(CNT_ROW,1).setValue('→食事回数：').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(CNT_ROW,2).setFormula('=COUNTA(B'+LOG_TOP+':B'+LOG_BOT+')');
+  // 合計/理想/差分/累計 ラベル
+  sh.getRange(SUM_ROW,2).setValue('合計').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(IDEAL_ROW,2).setValue('理想').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(DIFF_ROW,2).setValue('差分').setFontWeight('bold').setHorizontalAlignment('right');
+  sh.getRange(CUM_ROW,2).setValue('累計').setFontWeight('bold').setHorizontalAlignment('right');
+  // 合計: C/D/E はログ自動集計、F〜I(睡眠/入浴/有酸素/マッサージ)は入力値
+  sh.getRange(SUM_ROW,3).setFormula('=SUM(C'+LOG_TOP+':C'+LOG_BOT+')');
+  sh.getRange(SUM_ROW,4).setFormula('=SUM(D'+LOG_TOP+':D'+LOG_BOT+')');
+  sh.getRange(SUM_ROW,5).setFormula('=SUM(E'+LOG_TOP+':E'+LOG_BOT+')');
+  // 理想 C〜I
+  sh.getRange(IDEAL_ROW,3,1,7).setValues([[470,80,3000,7,60,60,60]]);
+  // 差分 C〜I = 合計-理想
+  for(var c=3;c&lt;=9;c++) sh.getRange(DIFF_ROW,c).setFormula('=IF('+colL_(c)+SUM_ROW+'="","",'+colL_(c)+SUM_ROW+'-'+colL_(c)+IDEAL_ROW+')');
+  // 累計 = 合計
+  for(var c2=3;c2&lt;=9;c2++) sh.getRange(CUM_ROW,c2).setFormula('='+colL_(c2)+SUM_ROW);
+  sh.getRange(SUM_ROW,2,4,8).setBorder(true,true,true,true,true,true);
   // 体組成ヘッダー
-  sh.getRange(3,1,1,7).setValues([['からだ（朝の計測）','前日','当日','前日比','当初比*','目標','差分(残り)']])
-    .setFontWeight('bold').setBackground('#fdeef2').setHorizontalAlignment('center');
-  sh.getRange(3,1).setHorizontalAlignment('left');
-  // 体組成 行
+  sh.getRange(BODY_HDR,2,1,6).setValues([['前日','当日','前日比','当初比*','目標','差分(残り)']]).setFontWeight('bold').setHorizontalAlignment('center');
   for(var i=0;i&lt;BODY.length;i++){
-    var r=BODY_START+i;
-    sh.getRange(r,1).setValue(BODY[i][1]).setFontWeight('bold');
-    if(BODY[i][2]!=='') sh.getRange(r,6).setValue(BODY[i][2]);   // 目標=F列
+    var r=BODY_TOP+i;
+    sh.getRange(r,1).setValue(BODY[i][0]).setFontWeight('bold').setBackground('#f6a04b').setHorizontalAlignment('center');
+    if(BODY[i][2]!=='') sh.getRange(r,6).setValue(BODY[i][2]);   // 目標=F
   }
-  // 合計ブロック ヘッダー
-  sh.getRange(12,1,1,5).setValues([['1日の合計','カロリー(kcal)','プロテイン(g)','水分(ml)','睡眠(h)']])
-    .setFontWeight('bold').setBackground('#fdeef2').setHorizontalAlignment('center');
-  sh.getRange(12,1).setHorizontalAlignment('left');
-  sh.getRange(13,1).setValue('合計').setFontWeight('bold');
-  sh.getRange(14,1).setValue('理想').setFontWeight('bold');
-  sh.getRange(15,1).setValue('差分').setFontWeight('bold');
-  sh.getRange(16,1).setValue('累計').setFontWeight('bold');
-  // 合計＝ログ自動集計（C/D/E列を19行目以降SUM）
-  sh.getRange(13,2).setFormula('=SUM(C'+LOG_START+':C)');
-  sh.getRange(13,3).setFormula('=SUM(D'+LOG_START+':D)');
-  sh.getRange(13,4).setFormula('=SUM(E'+LOG_START+':E)');
-  // 理想
-  sh.getRange(14,2,1,4).setValues([[470,80,3000,7]]);
-  // 差分
-  sh.getRange(15,2).setFormula('=B13-B14');
-  sh.getRange(15,3).setFormula('=C13-C14');
-  sh.getRange(15,4).setFormula('=D13-D14');
-  sh.getRange(15,5).setFormula('=IF(E13="","",E13-E14)');
-  // 累計（＝合計）
-  sh.getRange(16,2).setFormula('=B13');
-  sh.getRange(16,3).setFormula('=C13');
-  sh.getRange(16,4).setFormula('=D13');
-  sh.getRange(16,5).setFormula('=IF(E13="","",E13)');
-  // ログ見出し
-  sh.getRange(LOG_HEAD_ROW,1,1,LOG_HEADER.length).setValues([LOG_HEADER])
-    .setFontWeight('bold').setBackground('#f7c6d4').setHorizontalAlignment('center');
-  sh.setFrozenRows(LOG_HEAD_ROW);
-  try{ sh.setColumnWidth(1,74); sh.setColumnWidth(2,210); sh.setColumnWidth(6,160); }catch(e){}
+  sh.getRange(BODY_HDR,1,BODY.length+1,7).setBorder(true,true,true,true,true,true);
+  sh.getRange(NOTE_ROW,5).setValue('*Day 0との比較');
+  // 体裁
+  sh.setFrozenRows(HDR_ROW);
+  try{
+    sh.setColumnWidth(1,90); sh.setColumnWidth(2,170);
+    for(var w=3;w&lt;=9;w++) sh.setColumnWidth(w,108);
+  }catch(e){}
   try{ sh.getRange('A1').setNote('日付: '+date+' / '+(phaseOf_(date)||'期間外')); }catch(e){}
 }
 
-/* ===== 食事1件を追記 ===== */
+/* ===== 食事1件を記録エリアに追記 ===== */
 function addEntry_(d){
   var sh=getOrCreateDayTab_(d.date);
-  sh.appendRow([ d.time||'', d.food||'', bn_(d.kcal), bn_(d.protein), bn_(d.water), d.memo||'' ]);
+  var r=firstEmptyLog_(sh);
+  sh.getRange(r,1,1,5).setValues([[ d.time||'', d.food||'', bn_(d.kcal), bn_(d.protein), bn_(d.water) ]]);
   return objAssign_({ok:true}, getDay_(d.date));
 }
+function firstEmptyLog_(sh){
+  var vals=sh.getRange(LOG_TOP,1,LOG_BOT-LOG_TOP+1,2).getValues();
+  for(var i=0;i&lt;vals.length;i++){ if(String(vals[i][0])==='' &amp;&amp; String(vals[i][1])===''){ return LOG_TOP+i; } }
+  return LOG_BOT;   // 満杯時は最終行に（通常30件で足りる）
+}
 
-/* ===== 朝の計測（体組成）を保存 ===== */
-function saveBody_(d){
+/* ===== 1日の からだ・ケア を保存 ===== */
+function saveDaily_(d){
   var sh=getOrCreateDayTab_(d.date);
+  // 上部ラベル値
+  if(d.name!==undefined)   sh.getRange(1,9).setValue(d.name||'');
+  if(d.haiben!==undefined) sh.getRange(3,9).setValue(d.haiben||'');
+  if(d.benpi!==undefined)  sh.getRange(4,9).setValue(d.benpi||'');
+  if(d.taicho!==undefined) sh.getRange(5,9).setValue(d.taicho||'');
+  // 合計行の 睡眠/入浴/有酸素/マッサージ（F〜I=値）
+  if(d.sleep!==undefined)   sh.getRange(SUM_ROW,6).setValue(bn_(d.sleep));
+  if(d.bath!==undefined)    sh.getRange(SUM_ROW,7).setValue(bn_(d.bath));
+  if(d.aerobic!==undefined) sh.getRange(SUM_ROW,8).setValue(bn_(d.aerobic));
+  if(d.massage!==undefined) sh.getRange(SUM_ROW,9).setValue(bn_(d.massage));
+  if(d.sleep!==undefined &amp;&amp; d.sleep!=='' &amp;&amp; d.sleep!==null) sh.getRange(CNT_ROW,6).setValue(bn_(d.sleep)+'時間');
+  // 体組成
   var b=d.body||{};
   var prev=readBody_(findTab_(prevDate_(d.date)));
   var base=readBody_(findTab_('2026-08-28'));
   for(var i=0;i&lt;BODY.length;i++){
-    var key=BODY[i][0], r=BODY_START+i, goal=BODY[i][2];
+    var key=BODY[i][1], goal=BODY[i][2], r=BODY_TOP+i;
     var cur=numOrNull_(b[key]);
-    sh.getRange(r,3).setValue(cur===null?'':cur);                                  // 当日 C
+    sh.getRange(r,3).setValue(cur===null?'':cur);                                    // 当日 C
     var pv=prev?prev[key]:null;
-    sh.getRange(r,2).setValue(pv===null||pv===undefined?'':pv);                     // 前日 B
-    sh.getRange(r,4).setValue((cur!==null&amp;&amp;pv!=null&amp;&amp;pv!=='')?round2_(cur-pv):'');   // 前日比 D
+    sh.getRange(r,2).setValue(pv===null||pv===undefined?'':pv);                       // 前日 B
+    sh.getRange(r,4).setValue((cur!==null&amp;&amp;pv!=null&amp;&amp;pv!=='')?round2_(cur-pv):'');     // 前日比 D
     var bv=base?base[key]:null;
-    sh.getRange(r,5).setValue((cur!==null&amp;&amp;bv!=null&amp;&amp;bv!=='')?round2_(cur-bv):'');    // 当初比 E
-    sh.getRange(r,7).setValue((cur!==null&amp;&amp;goal!=='')?round2_(goal-cur):'');          // 差分(残り) G
+    sh.getRange(r,5).setValue((cur!==null&amp;&amp;bv!=null&amp;&amp;bv!=='')?round2_(cur-bv):'');      // 当初比 E
+    sh.getRange(r,7).setValue((cur!==null&amp;&amp;goal!=='')?round2_(goal-cur):'');            // 差分 G
   }
-  if(d.sleep!==undefined &amp;&amp; d.sleep!=='' &amp;&amp; d.sleep!==null) sh.getRange(SLEEP_CELL[0],SLEEP_CELL[1]).setValue(bn_(d.sleep));
   return objAssign_({ok:true}, getDay_(d.date));
 }
 function readBody_(sh){
   if(!sh) return null;
-  var vals=sh.getRange(BODY_START,3,BODY.length,1).getValues();
-  var o={};
-  for(var i=0;i&lt;BODY.length;i++){ var v=vals[i][0]; o[BODY[i][0]]=(v===''?null:Number(v)); }
+  var vals=sh.getRange(BODY_TOP,3,BODY.length,1).getValues(); var o={};
+  for(var i=0;i&lt;BODY.length;i++){ var v=vals[i][0]; o[BODY[i][1]]=(v===''?null:Number(v)); }
   return o;
 }
 
-/* ===== その日の一覧＋合計＋体組成 ===== */
+/* ===== その日の一覧＋合計＋からだ ===== */
 function getDay_(date){
   var sh=findTab_(date);
-  var out={ ok:true, date:date, tab:tabName_(date), title:tabTitle_(date), rows:[], total:{kcal:0,protein:0,water:0}, count:0, body:{}, sleep:'' };
+  var out={ ok:true, date:date, tab:tabName_(date), title:tabTitle_(date), rows:[], total:{kcal:0,protein:0,water:0}, count:0,
+            body:{}, name:'', haiben:'', benpi:'', taicho:'', sleep:'', bath:'', aerobic:'', massage:'' };
   if(!sh) return out;
-  var last=sh.getLastRow();
-  if(last&gt;=LOG_START){
-    var vals=sh.getRange(LOG_START,1,last-LOG_START+1,LOG_HEADER.length).getValues();
-    for(var i=0;i&lt;vals.length;i++){
-      var r=vals[i];
-      if(String(r.join(''))==='') continue;
-      out.rows.push({ row:LOG_START+i, time:fmtCell_(r[0]), food:r[1], kcal:n_(r[2]), protein:n_(r[3]), water:n_(r[4]), memo:r[5] });
-      out.total.kcal+=n_(r[2]); out.total.protein+=n_(r[3]); out.total.water+=n_(r[4]);
-    }
+  var vals=sh.getRange(LOG_TOP,1,LOG_BOT-LOG_TOP+1,9).getValues();
+  for(var i=0;i&lt;vals.length;i++){
+    var r=vals[i];
+    if(String(r[0])==='' &amp;&amp; String(r[1])==='') continue;
+    out.rows.push({ row:LOG_TOP+i, time:fmtCell_(r[0]), food:r[1], kcal:n_(r[2]), protein:n_(r[3]), water:n_(r[4]) });
+    out.total.kcal+=n_(r[2]); out.total.protein+=n_(r[3]); out.total.water+=n_(r[4]);
   }
-  out.total.protein=Math.round(out.total.protein*10)/10;
-  out.count=out.rows.length;
-  var bvals=sh.getRange(BODY_START,3,BODY.length,1).getValues();
-  for(var j=0;j&lt;BODY.length;j++){ var v=bvals[j][0]; out.body[BODY[j][0]]=(v===''?'':Number(v)); }
-  var sl=sh.getRange(SLEEP_CELL[0],SLEEP_CELL[1]).getValue();
-  out.sleep=(sl===''?'':Number(sl));
+  out.total.protein=Math.round(out.total.protein*10)/10; out.count=out.rows.length;
+  var bvals=sh.getRange(BODY_TOP,3,BODY.length,1).getValues();
+  for(var j=0;j&lt;BODY.length;j++){ var v=bvals[j][0]; out.body[BODY[j][1]]=(v===''?'':Number(v)); }
+  out.name  = sh.getRange(1,9).getValue();
+  out.haiben= sh.getRange(3,9).getValue();
+  out.benpi = sh.getRange(4,9).getValue();
+  out.taicho= sh.getRange(5,9).getValue();
+  out.sleep   = cellNum_(sh.getRange(SUM_ROW,6).getValue());
+  out.bath    = cellNum_(sh.getRange(SUM_ROW,7).getValue());
+  out.aerobic = cellNum_(sh.getRange(SUM_ROW,8).getValue());
+  out.massage = cellNum_(sh.getRange(SUM_ROW,9).getValue());
   return out;
 }
 
-/* ===== 1件削除 ===== */
+/* ===== 1件削除（行を空にする＝レイアウト維持） ===== */
 function deleteEntry_(d){
   var sh=findTab_(d.date);
-  if(sh &amp;&amp; d.row&gt;=LOG_START &amp;&amp; d.row&lt;=sh.getLastRow()) sh.deleteRow(d.row);
+  if(sh &amp;&amp; d.row&gt;=LOG_TOP &amp;&amp; d.row&lt;=LOG_BOT) sh.getRange(d.row,1,1,9).clearContent();
   return objAssign_({ok:true}, getDay_(d.date));
 }
 
@@ -511,9 +542,9 @@ function setupTabs_(){
   var made=[];
   for(var i=0;i&lt;31;i++){
     var dt=new Date(2026,7,28+i,12,0,0);
-    var date=Utilities.formatDate(dt, TZ, 'yyyy-MM-dd');
+    var date=Utilities.formatDate(dt,TZ,'yyyy-MM-dd');
     var sh=getOrCreateDayTab_(date);
-    buildTemplate_(sh, date);
+    buildTemplate_(sh,date);
     made.push(tabName_(date));
   }
   return { ok:true, rebuilt:made.length, tabs:made };
@@ -531,18 +562,21 @@ function ss_(){ return SpreadsheetApp.getActiveSpreadsheet(); }
 function json(o){ return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function n_(v){ v=parseFloat(v); return isNaN(v)?0:v; }
 function bn_(v){ v=parseFloat(v); return isNaN(v)?'':v; }
-function numOrNull_(v){ if(v===undefined||v===null||v==='')return null; var n=parseFloat(v); return isNaN(n)?null:n; }
+function cellNum_(v){ return (v===''||v===null||v===undefined)?'':(isNaN(Number(v))?v:Number(v)); }
+function numOrNull_(v){ if(v===undefined||v===null||v==='')return null; var x=parseFloat(v); return isNaN(x)?null:x; }
 function round2_(v){ return Math.round(n_(v)*100)/100; }
 function pad2_(n){ return (n&lt;10?'0':'')+n; }
 function prevDate_(date){ var p=date.split('-'); var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2])); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+pad2_(d.getMonth()+1)+'-'+pad2_(d.getDate()); }
-function fmtCell_(v){ if(v instanceof Date){ return Utilities.formatDate(v, TZ, 'H:mm'); } return v; }
+function fmtCell_(v){ if(v instanceof Date){ return Utilities.formatDate(v,TZ,'H:mm'); } return v; }
 function objAssign_(a,b){ for(var k in b){ if(b.hasOwnProperty(k)) a[k]=b[k]; } return a; }
 
 /* ===== 動作テスト（任意）===== */
-function testV3(){
+function testV4(){
   setupTabs_();
-  Logger.log(addEntry_({date:'2026-08-29', time:'8:00', food:'テスト', kcal:100, protein:5, water:200, memo:''}));
-  Logger.log(saveBody_({date:'2026-08-29', body:{weight:60.2,fat:31.8,bmi:22.4,water:46.7,visc:5,sub:29.5,muscle:39.7}, sleep:7}));
+  Logger.log(addEntry_({date:'2026-08-29', time:'8:00', food:'テスト', kcal:100, protein:5, water:200}));
+  Logger.log(saveDaily_({date:'2026-08-29', name:'森川', haiben:'あり', benpi:'なし', taicho:'良好',
+    sleep:7, bath:60, aerobic:30, massage:20,
+    body:{weight:60.2,fat:31.8,bmi:22.4,water:46.7,visc:5,sub:29.5,muscle:39.7}}));
   Logger.log(getDay_('2026-08-29'));
 }
 </textarea>
@@ -601,6 +635,7 @@ function init(){
   d.addEventListener('change',function(){ updateDateUI(); fetchDay(true); });
   document.getElementById('time').value=nowHM();
   document.getElementById('bc-weight').addEventListener('input',autoBMI);
+  bindSegs();
   updateDateUI();
   loadFoods();
   fetchDay(true);
@@ -640,11 +675,10 @@ function record(){
   if(!settings.url){ toast('設定で保存先URLをつないでね','err'); openSettings(); return; }
   var food=document.getElementById('food').value.trim();
   var kcal=numv('kcal'), pro=numv('protein'), water=numv('water');
-  var memo=document.getElementById('memo').value.trim();
   if(!food && !kcal && !water){ toast('食べたもの か 数値を入れてね','err'); return; }
   var payload={ action:'addEntry', token:settings.token, date:curDate(),
     time:document.getElementById('time').value||nowHM(), food:food,
-    kcal:kcal||'', protein:pro||'', water:water||'', memo:memo };
+    kcal:kcal||'', protein:pro||'', water:water||'' };
   var btn=document.getElementById('recBtn'); btn.disabled=true;
   toast('記録中…');
   post(payload).then(function(){
@@ -655,7 +689,7 @@ function record(){
   });
 }
 function clearEntry(){
-  ['food','kcal','protein','water','memo'].forEach(function(id){document.getElementById(id).value='';});
+  ['food','kcal','protein','water'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('time').value=nowHM();
 }
 function numv(id){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
@@ -668,22 +702,42 @@ function autoBMI(){
   var el=document.getElementById('bc-bmi');
   if(!isNaN(w) && w>0 && h>0){ el.value=Math.round(w/(h*h)*100)/100; } else { el.value=''; }
 }
-function populateBody(b,sleep){
+var segState={haiben:'',benpi:''};
+function setSeg(name,v){
+  var s=document.querySelector('.seg[data-seg="'+name+'"]'); if(!s)return;
+  s.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===v); });
+  segState[name]=v;
+}
+function bindSegs(){
+  document.querySelectorAll('.seg').forEach(function(s){
+    s.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){ setSeg(s.dataset.seg, b.dataset.v); });
+    });
+  });
+}
+function setV(id,v){ var el=document.getElementById(id); if(el) el.value=(v===''||v==null)?'':v; }
+function populateDaily(d){
   var map={weight:'bc-weight',fat:'bc-fat',bmi:'bc-bmi',water:'bc-water',visc:'bc-visc',sub:'bc-sub',muscle:'bc-muscle'};
-  Object.keys(map).forEach(function(k){ var el=document.getElementById(map[k]); if(el) el.value=(b[k]===''||b[k]==null)?'':b[k]; });
-  document.getElementById('bc-sleep').value=(sleep===''||sleep==null)?'':sleep;
+  var b=d.body||{};
+  Object.keys(map).forEach(function(k){ setV(map[k], b[k]); });
+  setV('bc-sleep',d.sleep); setV('care-bath',d.bath); setV('care-aero',d.aerobic); setV('care-mas',d.massage);
+  document.getElementById('taicho').value=d.taicho||'';
+  setSeg('haiben', d.haiben||''); setSeg('benpi', d.benpi||'');
   autoBMI();
 }
-function saveMorning(){
+function saveDaily(){
   if(!settings.url){ toast('設定で保存先URLをつないでね','err'); openSettings(); return; }
   autoBMI();
   var body={ weight:bcVal('bc-weight'),fat:bcVal('bc-fat'),bmi:bcVal('bc-bmi'),water:bcVal('bc-water'),visc:bcVal('bc-visc'),sub:bcVal('bc-sub'),muscle:bcVal('bc-muscle') };
-  var has=Object.keys(body).some(function(k){return body[k]!=='';}) || document.getElementById('bc-sleep').value!=='';
-  if(!has){ toast('計測値を入れてね','err'); return; }
+  var payload={ action:'saveDaily', token:settings.token, date:curDate(),
+    name:settings.name||'', haiben:segState.haiben, benpi:segState.benpi,
+    taicho:document.getElementById('taicho').value.trim(),
+    sleep:bcVal('bc-sleep'), bath:bcVal('care-bath'), aerobic:bcVal('care-aero'), massage:bcVal('care-mas'),
+    body:body };
   var btn=document.getElementById('bodyBtn'); btn.disabled=true; toast('保存中…');
-  post({action:'saveBody',token:settings.token,date:curDate(),body:body,sleep:bcVal('bc-sleep')}).then(function(){
-    btn.disabled=false; toast('朝の計測を保存しました ♡','ok'); fetchDay(false);
-  }).catch(function(e){ btn.disabled=false; window.__log&&window.__log('saveMorning: '+e.message,true); toast('送信しました。反映を確認します','ok'); });
+  post(payload).then(function(){
+    btn.disabled=false; toast('からだ・ケアを保存しました ♡','ok'); fetchDay(false);
+  }).catch(function(e){ btn.disabled=false; window.__log&&window.__log('saveDaily: '+e.message,true); toast('送信しました。反映を確認します','ok'); });
 }
 
 /* ===== fetch day ===== */
@@ -705,7 +759,6 @@ function renderDay(d, refreshBody){
   rows.slice().reverse().forEach(function(r){
     var el=document.createElement('div'); el.className='hitem';
     var extra=[];
-    if(r.memo) extra.push(r.memo);
     if(r.protein) extra.push('P'+r.protein+'g');
     if(r.water) extra.push('水'+r.water+'ml');
     el.innerHTML='<span class="tm">'+esc(r.time||'')+'</span>'+
@@ -715,7 +768,7 @@ function renderDay(d, refreshBody){
     el.querySelector('.x').addEventListener('click',function(){ delEntry(r.row); });
     box.appendChild(el);
   });
-  if(refreshBody) populateBody(d.body||{}, d.sleep);
+  if(refreshBody) populateDaily(d);
 }
 function delEntry(row){
   if(!settings.url)return;
